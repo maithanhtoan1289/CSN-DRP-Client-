@@ -1,0 +1,3 @@
+export const GOONG_MAP_KEY = "eYTiIOWuBePmP7TOJR9YB8B5PqJl032c3sbYLP9V";
+
+export const API_KEY = "O23dbzSYzUIZImN283YXWVDKWsIDz9Evs7zLcHGW";
