@@ -1,0 +1,94 @@
+.problem-left__wrapp {
+    display: flex;
+    padding: 12px;
+    position: relative;
+    margin-bottom: 14px;
+    border-radius: 10px;
+    background-color: #f5f5f5;
+
+    .problem-avarta {
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-right: 6px;
+        background-color: var(--white-color);
+        
+        .avarta-icon{
+            font-size: 2.6rem;
+        }
+    }
+
+    .problem-content {
+        .problem-decs {
+            padding-right: 50px;
+            text-align: justify; 
+        }
+
+        .problem-time {
+            display: block;
+            font-size: 1.3rem;
+            margin: -2px 0 4px;
+            color: var(--smoke-color);
+        }
+    }
+
+    .history-menu {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+
+        .history-menu__icon {
+            font-size: 3rem;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+
+            &:hover {
+                background-color: rgba(0, 0, 0, 0.18);
+            }
+        }
+
+        .history-menu__list {
+            display: flex;
+            flex-direction: column;
+            width: 160px;
+            padding: 10px 0;
+            background-color: var(--white-color);
+            box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            z-index: 10;
+            top: 34px;
+            right: 4px;
+            border-radius: 6px;
+            
+
+            .history-menu__item {
+                display: flex;
+                align-items: center;
+                font-size: 1.6rem;
+                padding: 3px;
+                color: var(--text-color);
+
+                &:hover:first-child {
+                    background-color: rgb(77, 144, 231);
+                    cursor: pointer;
+                }
+
+                &:hover:last-child {
+                    cursor: pointer;
+                    background-color: rgba(199, 38, 38, 0.4);
+                }
+
+                .menu-list__icon {
+                    font-size: 2rem;
+                    margin: 0 6px 0 10px;
+                }
+            }
+
+        }
+    }
+}

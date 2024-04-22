@@ -1,0 +1,53 @@
+.user-sidebar {
+    width: 25%;
+    background-color: #f7f7f7;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    .information {
+        text-align: center;
+        
+        .avarta {
+            margin-top: 80px;
+
+            .avarta-icon {
+                font-size: 5rem;
+            }
+        }
+
+        .name {
+            margin-top: 6px;
+            font-size: 2.2rem;
+            font-weight: 600;
+        }
+    }
+
+    .menu {
+        margin-top: 40px;
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #999;
+
+            .menu-icon {
+                font-size: 3rem;
+                color: var(--primary-color);
+            }
+
+            .menu-title {
+                margin-left: 6px;
+                font-size: 2rem;
+                font-weight: 500;
+            }
+        }
+
+        .active {
+            color: var(--primary-color);
+        }
+    }
+}
