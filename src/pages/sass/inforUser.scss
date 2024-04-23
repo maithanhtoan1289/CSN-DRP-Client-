@@ -1,0 +1,89 @@
+:root {
+    --primary-color: #ff8a00;
+    --white-color: white;
+    --smoke-color: #999;
+    --text-color: #333;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+::selection {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: "Raleway", sans-serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 1.5;
+    text-rendering: optimizeSpeed;
+    color: var(--text-color);
+}
+
+input,
+textarea {
+    outline: none;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.user-information {
+    padding: 80px 70px 50px;
+
+    .form-manage {
+
+        .form-heading {
+            margin-bottom: 20px;
+        }
+
+        .form-wrapp {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-information {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-input {
+            width: 340px;
+            padding: 8px 16px;
+            margin: 4px 0 20px;
+            font-size: 1.6rem;
+        }
+
+        .account-manager__form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .account-manager__radio {
+            display: flex;
+            margin: 4px 0 20px;
+        }
+
+        .account-manager__sex {
+            display: flex;
+            align-items: center;
+            margin-right: 50px;
+        }
+
+        .manage-sex__radio {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+        }
+    }
+}
