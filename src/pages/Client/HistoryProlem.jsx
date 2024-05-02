@@ -1,8 +1,37 @@
+import { useEffect, useState } from "react";
 import "../sass/historyProlem.scss";
 import HistoryItem from "./HistoryItem";
 import HistoryProblemItem from "./HistoryProblemItem";
+import Cookies from "js-cookie";
+import axios from "axios";
 
 const HistoryProlem = () => {
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        dataIncident();
+    }, []);
+
+    const accessToken = Cookies.get("accessToken");
+
+    const dataIncident = async () => {
+        try {
+            const res = await axios.get(
+                "http://localhost:5000/api/histories/incidents",
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            setData(res.data.data);
+            console.log(res.data.data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     return (
         <div className="history">
             <div className="history-wrapp">
@@ -13,30 +42,22 @@ const HistoryProlem = () => {
                         Sự cố tuyến đường đã chia sẻ
                     </h3>
                     <HistoryItem>
-                        <HistoryProblemItem
-                            nameUser="văn c"
-                            content="Tuyến đường từ Đà Nẵng ra Huế có 1 vụ tại nạn gây tắc đường."
-                        />
-                        <HistoryProblemItem
-                            nameUser="văn d"
-                            content="Tuyến đường từ Đà Nẵng ra Huế có 1 vụ tại nạn gây tắc đường."
-                        />
+                        {data.map((item) => (
+                            <HistoryProblemItem
+                                id={item.id}
+                                nameUser={item.name}
+                                location={item.location}
+                                content={item.description}
+                                dataIncident={dataIncident}
+                            />
+                        ))}
                     </HistoryItem>
                 </div>
+
                 <div className="history-problem wrapp-form">
                     <h3 className="history-problem__heading">
                         Bài viết quyên góp đã đăng
                     </h3>
-                    <HistoryItem>
-                        <HistoryProblemItem
-                            nameUser="văn g"
-                            content="Tuyến đường từ Đà Nẵng ra Huế có 1 vụ tại nạn gây tắc đường."
-                        />
-                        <HistoryProblemItem
-                            nameUser="văn h"
-                            content="Tuyến đường từ Đà Nẵng ra Huế có 1 vụ tại nạn gây tắc đường."
-                        />
-                    </HistoryItem>
                 </div>
             </div>
         </div>
