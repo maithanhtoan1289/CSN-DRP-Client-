@@ -1,46 +1,44 @@
+import axios from "axios";
+import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import CloseIcon from "@mui/icons-material/Close";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import "../sass/histotyItem.scss";
+import Button from "./Button";
 
-const HistoryProblemItem = ({ nameUser, content }) => {
-    const [showMenu, setShowMenu] = useState(false);
-    const [minute, setMinute] = useState(new Date().getTime());
+const HistoryProblemItem = ({
+    id,
+    nameUser,
+    location,
+    content,
+    dataIncident,
+}) => {
+    const accessToken = Cookies.get("accessToken");
     const menuRef = useRef(null);
-    console.log();
+
+    const [showMenu, setShowMenu] = useState(false);
+    const [formUpdate, setFormUpdate] = useState(false);
+    const [updateData, setUpdateData] = useState({
+        name: "",
+        location: "",
+        type: "",
+        status: "chưa giải quyết",
+        description: "",
+    });
+
+    const handleChange = (e) => {
+        setUpdateData({
+            ...updateData,
+            [e.target.name]: e.target.value,
+        });
+    };
 
     const handleMenu = () => {
         setShowMenu(!showMenu);
     };
-
-    function formatTimeAgo(minute) {
-        const seconds = Math.floor((new Date() - minute) / 1000);
-
-        // Chuyển đổi sang phút
-        if (seconds < 60) {
-            return `${seconds} giây trước`;
-        }
-
-        // Chuyển đổi sang giờ
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) {
-            return `${minutes} phút trước`;
-        }
-
-        // Chuyển đổi sang ngày
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) {
-            return `${hours} giờ trước`;
-        }
-
-        // Chuyển đổi sang ngày
-        const days = Math.floor(hours / 24);
-        return `${days} ngày trước`;
-    }
-
-    console.log(formatTimeAgo(minute));
 
     const hanleShowHide = () => {
         const handleClickOutside = (event) => {
@@ -60,8 +58,25 @@ const HistoryProblemItem = ({ nameUser, content }) => {
         hanleShowHide();
     }, []);
 
-    const handleEdit = () => {
-        alert(23);
+    const handleEdit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.put(
+                `http://localhost:5000/api/incident/${id}`,
+                updateData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            setFormUpdate(false);
+            dataIncident();
+            console.log(res);
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     const handleDelete = () => {
@@ -75,7 +90,10 @@ const HistoryProblemItem = ({ nameUser, content }) => {
             </span>
             <div className="problem-content">
                 <h4 className="problem-name">{nameUser}</h4>
-                <span className="problem-time">{formatTimeAgo(minute)}</span>
+                {/* <span className="problem-time">{formatTimeAgo(minute)}</span> */}
+                <p className="problem-decs">
+                    Tuyến đường gặp sự cố: {location}
+                </p>
                 <p className="problem-decs">{content}</p>
             </div>
             <span className="history-menu" ref={menuRef}>
@@ -86,7 +104,7 @@ const HistoryProblemItem = ({ nameUser, content }) => {
                     <div className="history-menu__list">
                         <span
                             className="history-menu__item"
-                            onClick={handleEdit}
+                            onClick={() => setFormUpdate(!formUpdate)}
                         >
                             <EditOutlinedIcon className="menu-list__icon" />{" "}
                             Chỉnh sửa
@@ -101,6 +119,107 @@ const HistoryProblemItem = ({ nameUser, content }) => {
                     </div>
                 )}
             </span>
+
+            {formUpdate && (
+                <div className="form-update">
+                    <form
+                        action=""
+                        className="problem-right__form"
+                        onSubmit={handleEdit}
+                    >
+                        <div
+                            className="form-update-icon"
+                            onClick={() => setFormUpdate(!formUpdate)}
+                        >
+                            <CloseIcon className="icon-close" />
+                        </div>
+                        <h3 className="right-title">Chỉnh sửa bài viết</h3>
+                        <div className="right-form">
+                            <label
+                                className="form-title"
+                                htmlFor="form-address"
+                            >
+                                Tên
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={updateData.name}
+                                onChange={handleChange}
+                                id="form-address"
+                                className="form-input"
+                            />
+                        </div>
+                        <div className="right-form">
+                            <label
+                                className="form-title"
+                                htmlFor="form-address"
+                            >
+                                Địa chỉ gặp sự cố
+                            </label>
+                            <input
+                                type="text"
+                                name="location"
+                                value={updateData.location}
+                                onChange={handleChange}
+                                id="form-address"
+                                className="form-input"
+                            />
+                        </div>
+                        <div className="right-form">
+                            <label className="form-title" htmlFor="form-type">
+                                Loại sự cố
+                            </label>
+                            <input
+                                type="text"
+                                name="type"
+                                value={updateData.type}
+                                onChange={handleChange}
+                                id="form-type"
+                                className="form-input"
+                            />
+                        </div>
+                        <div className="right-form">
+                            <label className="form-title" htmlFor="form-type">
+                                Trạng thái
+                            </label>
+                            <select
+                                id="form-type"
+                                className="form-input"
+                                name="status"
+                                value={updateData.status}
+                                onChange={handleChange}
+                            >
+                                <option value="chưa giải quyết">
+                                    chưa giải quyết
+                                </option>
+                                <option value="đã giải quyết">
+                                    đã giải quyết
+                                </option>
+                            </select>
+                        </div>
+                        <div className="right-form">
+                            <label
+                                className="form-title"
+                                htmlFor="form-content"
+                            >
+                                Nội dung sự cố
+                            </label>
+                            <textarea
+                                name="description"
+                                value={updateData.description}
+                                onChange={handleChange}
+                                id="form-content"
+                                className="form-input"
+                                placeholder="VD: tuyến đường ... đang gặp sự cố ..."
+                            ></textarea>
+                        </div>
+                        <div className="right-btn">
+                            <Button>Save</Button>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
 };

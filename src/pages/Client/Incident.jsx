@@ -5,73 +5,28 @@ import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import MyLocationOutlinedIcon from "@mui/icons-material/MyLocationOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import goongjs from "@goongmaps/goong-js";
+import "@goongmaps/goong-js/dist/goong-js.css";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 import "../sass/incident.scss";
 import Button from "../Client/Button";
-import { GOONG_MAP_KEY, API_KEY } from "../../constants/constants";
-import "@goongmaps/goong-js/dist/goong-js.css";
-import { useDispatch, useSelector } from "react-redux";
-import { geocoding } from "../../features/Goong/goongSlice";
-import { theme } from "antd";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Schema } from "yup";
-import {
-    addNaturalDisasterVersion1,
-    addNaturalDisasterVersion2,
-} from "../../features/NaturalDisaster/naturalDisastersSlice";
-import {
-    addProblemVersion1,
-    addProblemVersion2,
-} from "../../features/Problems/problemsSlice";
+import { GOONG_MAP_KEY } from "../../constants/constants";
+import { useSelector } from "react-redux";
 
 const Incident = () => {
-    // Redux State
-    // const dispatch = useDispatch();
-    // const userInfo = useSelector((state) => state?.user?.userInfo);
-    // const coordinates = useSelector(
-    //     (state) => state?.user?.userInfo?.coordinates
-    // );
+    const accessToken = Cookies.get("accessToken");
+    const userInfo = useSelector((state) => state?.user?.userInfo);
 
-    // // Constants
-    // let validLat = 0;
-    // let validLng = 0;
+    const token = {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+    };
 
-    // if (coordinates) {
-    //     const coordinatesParse = JSON.parse(coordinates);
-    //     validLat = parseFloat(coordinatesParse?.lat);
-    //     validLng = parseFloat(coordinatesParse?.lng);
-    // }
-
-    // Ant design
-    // const {
-    //     token: { borderRadiusLG },
-    // } = theme.useToken();
-
-    // Hook form
-    // const {
-    //     control,
-    //     // handleSubmit,
-    //     formState: { errors },
-    // } = useForm({
-    //     resolver: yupResolver(Schema),
-    // });
-
-    // Local State
-    // const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [emergencyType, setEmergencyType] = useState("");
-    // const [loading, setLoading] = useState(false);
-    // const [successMessage, setSuccessMessage] = useState("");
-    // const [username, setUsername] = useState("");
-    // const [password, setPassword] = useState("");
-    // const [markerPosition, setMarkerPosition] = useState([validLng, validLat]);
-    // const [hasCoordinates, setHasCoordinates] = useState(!!coordinates);
-    // const [isLogin] = useState(!!userInfo);
-    // const [showMap, setShowMap] = useState(hasCoordinates);
-    // const [showDanger, setShowDanger] = useState(true);
-
+    //render maps
     useEffect(() => {
-        // if (isLogin && hasCoordinates) {
         goongjs.accessToken = GOONG_MAP_KEY;
         const map = new goongjs.Map({
             container: "problem-map",
@@ -88,132 +43,63 @@ const Incident = () => {
             map.remove();
             marker.remove();
         };
-        // }
     }, []);
 
-    // Event Handlers
-
-    // const onSubmit = async (data) => {
-    //     try {
-    //         setLoading(true);
-
-    //         // Chuyển địa chỉ sang URL
-    //         const encodedAddress = encodeURIComponent(data.address);
-
-    //         // Chuyển username sang kiểu viết liền không dấu
-    //         const username = data.name
-    //             .toLowerCase()
-    //             .replace(/\s/g, "")
-    //             .normalize("NFD")
-    //             .replace(/[\u0300-\u036f]/g, "");
-    //         const currentDate = new Date()
-    //             .toLocaleString()
-    //             .replace(/[/:, ]/g, "");
-
-    //         // Tạo email từ username
-    //         const email = username + currentDate + "@gmail.com";
-
-    //         // Tạo data user
-    //         const newData = {
-    //             ...data,
-    //             type: emergencyType,
-    //             username: username + currentDate,
-    //             email: email,
-    //             role: "ROLE_USER",
-    //             password: "123456",
-    //         };
-
-    //         // Delete unnecessary fields based on emergencyType
-    //         if (newData.type === "Thiên tai") {
-    //             delete newData.incidentName;
-    //             delete newData.incidentType;
-    //         } else if (newData.type === "Sự cố") {
-    //             delete newData.naturalDisasterName;
-    //             delete newData.naturalDisasterType;
-    //         }
-
-    //         // Get coordinates if not available
-    //         let coordinates = markerPosition;
-
-    //         // if (coordinates[0] === 0 && coordinates[1] === 0) {
-    //         if (isLogin) {
-    //             const response = await dispatch(geocoding(encodedAddress));
-    //             coordinates = JSON.stringify(
-    //                 response.payload.geometry.location
-    //             );
-
-    //             const { lng, lat } = response.payload.geometry.location;
-    //             setMarkerPosition([parseFloat(lng), parseFloat(lat)]);
-    //             setHasCoordinates(true);
-    //             setShowDanger(false);
-    //             setShowMap(true);
-    //         } else {
-    //             const response = await dispatch(geocoding(encodedAddress));
-    //             coordinates = JSON.stringify(
-    //                 response.payload.geometry.location
-    //             );
-    //         }
-
-    //         // Add coordinates to newData
-    //         const geometryNewData = {
-    //             ...newData,
-    //             coordinates: coordinates,
-    //         };
-
-    //         if (userInfo === null) {
-    //             // Dispatch action based on emergencyType
-    //             if (geometryNewData.type === "Thiên tai") {
-    //                 const response = await dispatch(
-    //                     addNaturalDisasterVersion1(geometryNewData)
-    //                 );
-    //                 console.log("Dispatching addNaturalDisaster v1", response);
-    //             } else if (geometryNewData.type === "Sự cố") {
-    //                 const response = await dispatch(
-    //                     addProblemVersion1(geometryNewData)
-    //                 );
-    //                 console.log("Dispatching addProblem v1", response);
-    //             }
-
-    //             setSuccessMessage(
-    //                 "Bạn đã gửi thông tin cứu hộ thành công.\nNhân viên cứu hộ sẽ đến trong giây lát, xin bạn hãy kiên nhẫn đợi...\nBên dưới là tài khoản và mật khẩu để bạn đăng nhập và theo dõi vị trí của mình."
-    //             );
-    //             setUsername(newData.username);
-    //             setPassword(newData.password);
-    //         } else {
-    //             const userInfoData = {
-    //                 ...geometryNewData,
-    //                 id: userInfo.id,
-    //             };
-
-    //             delete userInfoData.username;
-    //             delete userInfoData.password;
-    //             delete userInfoData.role;
-
-    //             // Dispatch action based on emergencyType
-    //             if (geometryNewData.type === "Thiên tai") {
-    //                 await dispatch(addNaturalDisasterVersion2(userInfoData));
-    //             } else if (geometryNewData.type === "Sự cố") {
-    //                 await dispatch(addProblemVersion2(userInfoData));
-    //             }
-    //         }
-
-    //         setLoading(false);
-    //         setIsModalOpen(false);
-    //     } catch (error) {
-    //         console.log(error);
-    //         setLoading(false);
-    //     }
-    // };
-
-    // ==========================================
-
-    const initFormShareRoute = {
-        route: "",
-        problem: "",
-        content: "",
+    let initFormShareRoute = {
+        name: userInfo ? userInfo.name : "",
+        type: "",
+        description: "",
+        location: "",
+        status: "chưa giải quyết",
     };
 
     const [shareRoute, setShareRoute] = useState(initFormShareRoute);
+    const [startLocation, setStartLocation] = useState("");
+    const [endLocation, setEndLocation] = useState("");
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        dataIncident();
+    }, []);
+
+    const handleMaps = async () => {
+        const hashtags = { startLocation, endLocation };
+        if (startLocation === "" || endLocation === "") {
+            alert("Bạn cần nhập điểm bắt đầu và điểm đến");
+        }
+
+        try {
+            const res = await axios.post(
+                "http://localhost:5000/api/incident/find",
+                hashtags,
+                token
+            );
+
+            const result = res.data.data.map((item) => {
+                item.hashtags.map((hashtag) => {
+                    if (hashtag === endLocation) {
+                        // alert(hashtag);
+                    }
+                });
+            });
+
+            console.log("thông báo");
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const dataIncident = async () => {
+        try {
+            const res = await axios.get(
+                "http://localhost:5000/api/incident/getIncident",
+                token
+            );
+            setData(res.data.data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     const handleChange = (e) => {
         const { value, name } = e.target;
@@ -224,15 +110,21 @@ const Incident = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        try {
+            await axios.post(
+                "http://localhost:5000/api/incident/shareIncident",
+                shareRoute,
+                token
+            );
 
-        setShareRoute({
-            route: shareRoute.route,
-            problem: shareRoute.problem,
-            content: shareRoute.content,
-        });
-        console.log(shareRoute);
+            dataIncident();
+            setShareRoute(initFormShareRoute);
+            alert("Chia sẻ thành công");
+        } catch {
+            alert("Bạn cần nhập thông tin vào form");
+        }
     };
 
     return (
@@ -253,20 +145,21 @@ const Incident = () => {
                             className="from-input"
                             type="text"
                             name="from"
-                            // value={markerPosition.validLat}
-                            // onChange={(e) => setMarkerPosition(e.target.value)}
+                            value={startLocation}
+                            onChange={(e) => setStartLocation(e.target.value)}
                             placeholder="Điểm bắt đầu"
                         />
                         <input
                             className="from-input"
                             type="text"
                             name="to"
-                            // value={markerPosition.validLng}
+                            value={endLocation}
+                            onChange={(e) => setEndLocation(e.target.value)}
                             placeholder="Điểm đến..."
                         />
                     </div>
                     <div className="problem-button">
-                        <Button>Đường đi</Button>
+                        <Button onClick={handleMaps}>Đường đi</Button>
                         <MyLocationOutlinedIcon className="problem-form__icon" />
                     </div>
                 </div>
@@ -274,45 +167,26 @@ const Incident = () => {
 
             <div className="problem-share">
                 <div className="problem-left">
-                    <div className="problem-left__wrapp">
-                        <span className="problem-avarta">
-                            <PersonOutlineOutlinedIcon className="avarta-icon" />
-                        </span>
-                        <div className="problem-content">
-                            <h4 className="problem-name">Văn A</h4>
-                            <span className="problem-time">10 phút</span>
-                            <p className="problem-decs">
-                                Tuyến đường từ Đà Nẵng ra Huế có 1 vụ tại nạn
-                                gây tắc đường.
-                            </p>
+                    {data.slice(0, 5).map((item) => (
+                        <div key={item.id}>
+                            <div className="problem-left__wrapp">
+                                <span className="problem-avarta">
+                                    <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                </span>
+                                <div className="problem-content">
+                                    <h4 className="problem-name">
+                                        {item.name}
+                                    </h4>
+                                    <p className="problem-decs">
+                                        Tuyến đường gặp sự cố: {item.location}
+                                    </p>
+                                    <p className="problem-decs">
+                                        {item.description}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div className="problem-left__wrapp">
-                        <span className="problem-avarta">
-                            <PersonOutlineOutlinedIcon className="avarta-icon" />
-                        </span>
-                        <div className="problem-content">
-                            <h4 className="problem-name">Văn A</h4>
-                            <span className="problem-time">10 phút</span>
-                            <p className="problem-decs">
-                                Tuyến đường từ Đà Nẵng ra Huế có 1 vụ tại nạn
-                                gây tắc đường.
-                            </p>
-                        </div>
-                    </div>
-                    <div className="problem-left__wrapp">
-                        <span className="problem-avarta">
-                            <PersonOutlineOutlinedIcon className="avarta-icon" />
-                        </span>
-                        <div className="problem-content">
-                            <h4 className="problem-name">Văn A</h4>
-                            <span className="problem-time">10 phút</span>
-                            <p className="problem-decs">
-                                Tuyến đường từ Đà Nẵng ra Huế có 1 vụ tại nạn
-                                gây tắc đường.
-                            </p>
-                        </div>
-                    </div>
+                    ))}
                 </div>
 
                 <div className="problem-right">
@@ -329,12 +203,28 @@ const Incident = () => {
                                 className="form-title"
                                 htmlFor="form-address"
                             >
-                                Tuyến đường gặp sự cố
+                                Tên
                             </label>
                             <input
                                 type="text"
-                                name="route"
-                                defaultValue={shareRoute.route}
+                                name="name"
+                                value={shareRoute.name}
+                                onChange={handleChange}
+                                id="form-address"
+                                className="form-input"
+                            />
+                        </div>
+                        <div className="right-form">
+                            <label
+                                className="form-title"
+                                htmlFor="form-address"
+                            >
+                                Địa chỉ gặp sự cố
+                            </label>
+                            <input
+                                type="text"
+                                name="location"
+                                value={shareRoute.location}
                                 onChange={handleChange}
                                 id="form-address"
                                 className="form-input"
@@ -346,12 +236,31 @@ const Incident = () => {
                             </label>
                             <input
                                 type="text"
-                                name="problem"
-                                defaultValue={shareRoute.problem}
+                                name="type"
+                                value={shareRoute.type}
                                 onChange={handleChange}
                                 id="form-type"
                                 className="form-input"
                             />
+                        </div>
+                        <div className="right-form">
+                            <label className="form-title" htmlFor="form-type">
+                                Trạng thái
+                            </label>
+                            <select
+                                id="form-type"
+                                className="form-input"
+                                name="status"
+                                value={shareRoute.status}
+                                onChange={handleChange}
+                            >
+                                <option value="chưa giải quyết">
+                                    chưa giải quyết
+                                </option>
+                                <option value="đã giải quyết">
+                                    đã giải quyết
+                                </option>
+                            </select>
                         </div>
                         <div className="right-form">
                             <label
@@ -361,15 +270,16 @@ const Incident = () => {
                                 Nội dung sự cố
                             </label>
                             <textarea
-                                name="content"
-                                id="form-content"
-                                defaultValue={shareRoute.content}
+                                name="description"
+                                value={shareRoute.description}
                                 onChange={handleChange}
+                                id="form-content"
                                 className="form-input"
+                                placeholder="VD: tuyến đường ... đang gặp sự cố ..."
                             ></textarea>
                         </div>
                         <div className="right-btn">
-                            <Button>Lấy tuyến đường hiện tại</Button>
+                            {/* <Button>Lấy tuyến đường hiện tại</Button> */}
                             <Button>Chia sẻ</Button>
                         </div>
                     </form>
