@@ -1,6 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
+
 import CloseIcon from "@mui/icons-material/Close";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -13,7 +14,8 @@ const HistoryProblemItem = ({
     id,
     nameUser,
     location,
-    content,
+    type,
+    description,
     dataIncident,
 }) => {
     const accessToken = Cookies.get("accessToken");
@@ -22,11 +24,11 @@ const HistoryProblemItem = ({
     const [showMenu, setShowMenu] = useState(false);
     const [formUpdate, setFormUpdate] = useState(false);
     const [updateData, setUpdateData] = useState({
-        name: "",
-        location: "",
-        type: "",
-        status: "chưa giải quyết",
-        description: "",
+        name: nameUser ? nameUser : "",
+        location: location ? location : "",
+        type: type ? type : "",
+        status: "chưa giải quyết" ? "chưa giải quyết" : "",
+        description: description ? description : "",
     });
 
     const handleChange = (e) => {
@@ -46,9 +48,7 @@ const HistoryProblemItem = ({
                 setShowMenu(false);
             }
         };
-
         document.addEventListener("click", handleClickOutside);
-
         return () => {
             document.removeEventListener("click", handleClickOutside);
         };
@@ -61,7 +61,7 @@ const HistoryProblemItem = ({
     const handleEdit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.put(
+            await axios.put(
                 `http://localhost:5000/api/incident/${id}`,
                 updateData,
                 {
@@ -73,14 +73,28 @@ const HistoryProblemItem = ({
             );
             setFormUpdate(false);
             dataIncident();
-            console.log(res);
         } catch (e) {
             console.log(e);
         }
     };
 
-    const handleDelete = () => {
-        alert(23);
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.delete(
+                `http://localhost:5000/api/incident/delete/${id}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            setShowMenu(false);
+            dataIncident();
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     return (
@@ -90,11 +104,15 @@ const HistoryProblemItem = ({
             </span>
             <div className="problem-content">
                 <h4 className="problem-name">{nameUser}</h4>
-                {/* <span className="problem-time">{formatTimeAgo(minute)}</span> */}
                 <p className="problem-decs">
-                    Tuyến đường gặp sự cố: {location}
+                    <strong>Tuyến đường gặp sự cố:</strong> {location}
                 </p>
-                <p className="problem-decs">{content}</p>
+                <p className="problem-decs">
+                    <strong>Loại sự cố:</strong> {type}
+                </p>
+                <p className="problem-decs">
+                    <strong>Mô tả sự cố:</strong> {description}
+                </p>
             </div>
             <span className="history-menu" ref={menuRef}>
                 <span onClick={handleMenu}>

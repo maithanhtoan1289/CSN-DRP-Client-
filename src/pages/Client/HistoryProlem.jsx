@@ -6,13 +6,12 @@ import Cookies from "js-cookie";
 import axios from "axios";
 
 const HistoryProlem = () => {
+    const accessToken = Cookies.get("accessToken");
     const [data, setData] = useState([]);
 
     useEffect(() => {
         dataIncident();
     }, []);
-
-    const accessToken = Cookies.get("accessToken");
 
     const dataIncident = async () => {
         try {
@@ -26,7 +25,6 @@ const HistoryProlem = () => {
                 }
             );
             setData(res.data.data);
-            console.log(res.data.data);
         } catch (err) {
             console.log(err);
         }
@@ -44,10 +42,12 @@ const HistoryProlem = () => {
                     <HistoryItem>
                         {data.map((item) => (
                             <HistoryProblemItem
+                                key={item.id}
                                 id={item.id}
                                 nameUser={item.name}
                                 location={item.location}
-                                content={item.description}
+                                type={item.type}
+                                description={item.description}
                                 dataIncident={dataIncident}
                             />
                         ))}
