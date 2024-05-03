@@ -1,21 +1,31 @@
-import { useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
 import Button from "../Client/Button";
 import "../sass/inforUser.scss";
 
 const InforUser = () => {
+    const accessToken = Cookies.get("accessToken");
+
+    const token = {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+    };
     const initInfo = {
         name: "",
         address: "",
         phone: "",
         email: "",
-        // sex: {
-        //     male: "nam",
-        //     female: "nu",
-        //     no: "no",
-        // },
     };
 
     const [userInfo, setuserInfo] = useState(initInfo);
+    const [profile, setProfile] = useState([]);
+
+    useEffect(() => {
+        dataProfile();
+    }, []);
 
     const handleChange = (e) => {
         const { value, name } = e.target;
@@ -35,6 +45,23 @@ const InforUser = () => {
             email: userInfo.email,
         });
         console.log(userInfo);
+    };
+
+    const handlePassword = (e) => {
+        e.preventDefault();
+    };
+
+    const dataProfile = async () => {
+        try {
+            const res = await axios.get(
+                "http://localhost:5000/api/users/profile",
+                token
+            );
+            setProfile(res.data.data);
+            console.log(res.data.data);
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     return (
@@ -102,44 +129,7 @@ const InforUser = () => {
                         />
                     </div>
                 </div>
-                {/* <div className="account-manager__form">
-                    <label htmlFor="">Giới tính</label>
-                    <div className="account-manager__radio">
-                        <div className="account-manager__sex">
-                            <input
-                                type="radio"
-                                name="sex"
-                                defaultValue={userInfo.sex.male}
-                                onChange={handleChange}
-                                className="manage-sex__radio"
-                                id="male"
-                            />
-                            <label htmlFor="male">Nam</label>
-                        </div>
-                        <div className="account-manager__sex">
-                            <input
-                                type="radio"
-                                name="sex"
-                                defaultValue={userInfo.sex.female}
-                                onChange={handleChange}
-                                className="manage-sex__radio"
-                                id="female"
-                            />
-                            <label htmlFor="female">Nữ</label>
-                        </div>
-                        <div className="account-manager__sex">
-                            <input
-                                type="radio"
-                                name="sex"
-                                defaultValue={userInfo.sex.no}
-                                onChange={handleChange}
-                                className="manage-sex__radio"
-                                id="no"
-                            />
-                            <label htmlFor="no">Không áp dụng</label>
-                        </div>
-                    </div>
-                </div> */}
+
                 <Button>Cập nhật</Button>
             </form>
             <div className="form-manage wrapp-form">
@@ -161,7 +151,7 @@ const InforUser = () => {
                             className="form-input"
                         />
                     </div>
-                    <Button>Thay đổi mật khẩu</Button>
+                    <Button onClick={handlePassword}>Thay đổi mật khẩu</Button>
                 </form>
             </div>
         </div>

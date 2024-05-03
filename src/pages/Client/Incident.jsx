@@ -57,6 +57,7 @@ const Incident = () => {
     const [startLocation, setStartLocation] = useState("");
     const [endLocation, setEndLocation] = useState("");
     const [data, setData] = useState([]);
+    const [dataRout, setDataRout] = useState([]);
 
     useEffect(() => {
         dataIncident();
@@ -74,16 +75,7 @@ const Incident = () => {
                 hashtags,
                 token
             );
-
-            const result = res.data.data.map((item) => {
-                item.hashtags.map((hashtag) => {
-                    if (hashtag === endLocation) {
-                        // alert(hashtag);
-                    }
-                });
-            });
-
-            console.log("thông báo");
+            setDataRout(res.data.data);
         } catch (err) {
             console.log(err);
         }
@@ -95,7 +87,8 @@ const Incident = () => {
                 "http://localhost:5000/api/incident/getIncident",
                 token
             );
-            setData(res.data.data);
+            const slicedData = res.data.data.slice(0, 6);
+            setData(slicedData);
         } catch (err) {
             console.log(err);
         }
@@ -122,8 +115,8 @@ const Incident = () => {
             dataIncident();
             setShareRoute(initFormShareRoute);
             alert("Chia sẻ thành công");
-        } catch {
-            alert("Bạn cần nhập thông tin vào form");
+        } catch (e) {
+            console.log(e);
         }
     };
 
@@ -167,26 +160,63 @@ const Incident = () => {
 
             <div className="problem-share">
                 <div className="problem-left">
-                    {data.slice(0, 5).map((item) => (
-                        <div key={item.id}>
-                            <div className="problem-left__wrapp">
-                                <span className="problem-avarta">
-                                    <PersonOutlineOutlinedIcon className="avarta-icon" />
-                                </span>
-                                <div className="problem-content">
-                                    <h4 className="problem-name">
-                                        {item.name}
-                                    </h4>
-                                    <p className="problem-decs">
-                                        Tuyến đường gặp sự cố: {item.location}
-                                    </p>
-                                    <p className="problem-decs">
-                                        {item.description}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                    {dataRout.length > 0 && dataRout
+                        ? dataRout.map((item) => (
+                              <div key={item.id}>
+                                  <div className="problem-left__wrapp">
+                                      <span className="problem-avarta">
+                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                      </span>
+                                      <div className="problem-content">
+                                          <h4 className="problem-name">
+                                              {item.name}
+                                          </h4>
+                                          <p className="problem-decs">
+                                              <strong>
+                                                  Tuyến đường gặp sự cố:
+                                              </strong>{" "}
+                                              {item.location}
+                                          </p>
+                                          <p className="problem-decs">
+                                              <strong>Loại sự cố:</strong>{" "}
+                                              {item.type}
+                                          </p>
+                                          <p className="problem-decs">
+                                              <strong>Mô tả sự cố:</strong>{" "}
+                                              {item.description}
+                                          </p>
+                                      </div>
+                                  </div>
+                              </div>
+                          ))
+                        : data.map((item) => (
+                              <div key={item.id}>
+                                  <div className="problem-left__wrapp">
+                                      <span className="problem-avarta">
+                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                      </span>
+                                      <div className="problem-content">
+                                          <h4 className="problem-name">
+                                              {item.name}
+                                          </h4>
+                                          <p className="problem-decs">
+                                              <strong>
+                                                  Tuyến đường gặp sự cố:
+                                              </strong>{" "}
+                                              {item.location}
+                                          </p>
+                                          <p className="problem-decs">
+                                              <strong>Loại sự cố:</strong>{" "}
+                                              {item.type}
+                                          </p>
+                                          <p className="problem-decs">
+                                              <strong>Mô tả sự cố:</strong>{" "}
+                                              {item.description}
+                                          </p>
+                                      </div>
+                                  </div>
+                              </div>
+                          ))}
                 </div>
 
                 <div className="problem-right">
