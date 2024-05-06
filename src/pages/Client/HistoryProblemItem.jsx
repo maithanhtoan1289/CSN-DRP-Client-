@@ -1,14 +1,14 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 
 import CloseIcon from "@mui/icons-material/Close";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import "../sass/histotyItem.scss";
 import Button from "./Button";
+import { Avatar, message } from "antd";
+import Menu from "./Menu";
 
 const HistoryProblemItem = ({
     id,
@@ -18,10 +18,10 @@ const HistoryProblemItem = ({
     description,
     dataIncident,
 }) => {
-    const accessToken = Cookies.get("accessToken");
-    const menuRef = useRef(null);
+    const userInfo = useSelector((state) => state?.user?.userInfo);
 
-    const [showMenu, setShowMenu] = useState(false);
+    const accessToken = Cookies.get("accessToken");
+
     const [formUpdate, setFormUpdate] = useState(false);
     const [updateData, setUpdateData] = useState({
         name: nameUser ? nameUser : "",
@@ -38,26 +38,6 @@ const HistoryProblemItem = ({
         });
     };
 
-    const handleMenu = () => {
-        setShowMenu(!showMenu);
-    };
-
-    const hanleShowHide = () => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setShowMenu(false);
-            }
-        };
-        document.addEventListener("click", handleClickOutside);
-        return () => {
-            document.removeEventListener("click", handleClickOutside);
-        };
-    };
-
-    useEffect(() => {
-        hanleShowHide();
-    }, []);
-
     const handleEdit = async (e) => {
         e.preventDefault();
         try {
@@ -71,6 +51,7 @@ const HistoryProblemItem = ({
                     },
                 }
             );
+            message.success("Sửa bài viết thành công");
             setFormUpdate(false);
             dataIncident();
         } catch (e) {
@@ -90,7 +71,7 @@ const HistoryProblemItem = ({
                     },
                 }
             );
-            setShowMenu(false);
+            message.success("Xóa bài viết thành công");
             dataIncident();
         } catch (e) {
             console.log(e);
@@ -100,7 +81,28 @@ const HistoryProblemItem = ({
     return (
         <div className="problem-left__wrapp">
             <span className="problem-avarta">
-                <PersonOutlineOutlinedIcon className="avarta-icon" />
+                {userInfo ? (
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "20px",
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                cursor: "pointer",
+                            }}
+                        >
+                            <Avatar src={userInfo?.avatar} />
+                        </div>
+                    </div>
+                ) : (
+                    <PersonOutlineOutlinedIcon className="avarta-icon" />
+                )}
             </span>
             <div className="problem-content">
                 <h4 className="problem-name">{nameUser}</h4>
@@ -114,29 +116,12 @@ const HistoryProblemItem = ({
                     <strong>Mô tả sự cố:</strong> {description}
                 </p>
             </div>
-            <span className="history-menu" ref={menuRef}>
-                <span onClick={handleMenu}>
-                    <MoreHorizIcon className="history-menu__icon" />
-                </span>
-                {showMenu && (
-                    <div className="history-menu__list">
-                        <span
-                            className="history-menu__item"
-                            onClick={() => setFormUpdate(!formUpdate)}
-                        >
-                            <EditOutlinedIcon className="menu-list__icon" />{" "}
-                            Chỉnh sửa
-                        </span>
-                        <span
-                            className="history-menu__item"
-                            onClick={handleDelete}
-                        >
-                            <DeleteOutlineOutlinedIcon className="menu-list__icon" />{" "}
-                            Xóa
-                        </span>
-                    </div>
-                )}
-            </span>
+
+            <Menu
+                handleDelete={handleDelete}
+                setFormUpdate={setFormUpdate}
+                formUpdate={formUpdate}
+            />
 
             {formUpdate && (
                 <div className="form-update">
@@ -151,7 +136,9 @@ const HistoryProblemItem = ({
                         >
                             <CloseIcon className="icon-close" />
                         </div>
-                        <h3 className="right-title">Chỉnh sửa bài viết</h3>
+                        <h3 className="right-title">
+                            Chỉnh sửa bài viết sự cố tuyến đường
+                        </h3>
                         <div className="right-form">
                             <label
                                 className="form-title"
@@ -160,6 +147,8 @@ const HistoryProblemItem = ({
                                 Tên
                             </label>
                             <input
+                                disabled
+                                style={{ cursor: "no-drop" }}
                                 type="text"
                                 name="name"
                                 value={updateData.name}

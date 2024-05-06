@@ -3,9 +3,23 @@
     width: 1200px;
     margin: 0 auto;
 
+    .wrapp-form {
+        padding: 20px;
+        margin-top: 20px;
+        border-radius: 6px;
+        background-color: var(--white-color);
+        border: 1px solid var(--smoke-color);
+    }
+
     .history-wrapp {
         
         .history-problem {
+            display: flex;
+            column-gap: 20px;
+
+            .history-problem-incident {
+                width: 50%;
+            }
 
             .history-problem__heading {
                 margin-bottom: 20px;

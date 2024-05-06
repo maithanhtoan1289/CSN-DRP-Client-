@@ -8,11 +8,12 @@ import goongjs from "@goongmaps/goong-js";
 import "@goongmaps/goong-js/dist/goong-js.css";
 import axios from "axios";
 import Cookies from "js-cookie";
-
+import { message } from "antd";
 import "../sass/incident.scss";
 import Button from "../Client/Button";
 import { GOONG_MAP_KEY } from "../../constants/constants";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { reverseGeocoding } from "../../features/Goong/goongSlice";
 
 const Incident = () => {
     const accessToken = Cookies.get("accessToken");
@@ -58,9 +59,12 @@ const Incident = () => {
     const [endLocation, setEndLocation] = useState("");
     const [data, setData] = useState([]);
     const [dataRout, setDataRout] = useState([]);
+    const [expertise, setExpertise] = useState([]);
+    const [rescuer, setRescuer] = useState({ specialty: "", description: "" });
 
     useEffect(() => {
         dataIncident();
+        dataRescuer();
     }, []);
 
     const handleMaps = async () => {
@@ -76,6 +80,12 @@ const Incident = () => {
                 token
             );
             setDataRout(res.data.data);
+            const checkProblem = res.data.data.length;
+            if (checkProblem > 0) {
+                message.warning("Tuyến đường này đang gặp sự cố");
+            } else {
+                message.success("tuyến đường này không gặp sự cố");
+            }
         } catch (err) {
             console.log(err);
         }
@@ -103,6 +113,14 @@ const Incident = () => {
         });
     };
 
+    const handleChangeSpecialty = (e) => {
+        const { value, name } = e.target;
+        setRescuer({
+            ...rescuer,
+            [name]: value,
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -114,9 +132,72 @@ const Incident = () => {
 
             dataIncident();
             setShareRoute(initFormShareRoute);
-            alert("Chia sẻ thành công");
+            message.success("Chia sẻ thành công");
+        } catch (e) {
+            message.error(
+                "Bạn chưa đăng nhập hoặc chưa điền thông tin vào form"
+            );
+        }
+    };
+
+    const dataRescuer = async () => {
+        try {
+            const res = await axios.get(
+                "http://localhost:5000/api/expertise/getExpertise",
+                token
+            );
+            setExpertise(res.data.data);
         } catch (e) {
             console.log(e);
+        }
+    };
+
+    const handleRescuer = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post(
+                "http://localhost:5000/api/expertise/create",
+                rescuer,
+                token
+            );
+            setRescuer({ specialty: "", description: "" });
+            dataRescuer();
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    const dispatch = useDispatch();
+    const [valueAddress, setValueAddress] = useState("");
+
+    const getCurrentPosition = async () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    const latlng = `${latitude},%20${longitude}`;
+
+                    console.log("latlng", latlng);
+
+                    try {
+                        const res = await dispatch(reverseGeocoding(latlng));
+                        console.log("res", res.payload.data.results[0].address);
+                        setValueAddress(res.payload.data.results[0].address);
+                    } catch (error) {
+                        console.error(
+                            "Lỗi khi thực hiện reverse geocoding:",
+                            error
+                        );
+                    }
+                },
+                (error) => {
+                    console.error("Lỗi khi lấy vị trí hiện tại:", error);
+                }
+            );
+        } else {
+            console.error("Trình duyệt không hỗ trợ Geolocation");
         }
     };
 
@@ -131,95 +212,39 @@ const Incident = () => {
             </header>
 
             <div className="problem-wrapp">
-                <div id="problem-map" className="problem-map"></div>
-                <div className="problem-form">
-                    <div className="from-address">
-                        <input
-                            className="from-input"
-                            type="text"
-                            name="from"
-                            value={startLocation}
-                            onChange={(e) => setStartLocation(e.target.value)}
-                            placeholder="Điểm bắt đầu"
-                        />
-                        <input
-                            className="from-input"
-                            type="text"
-                            name="to"
-                            value={endLocation}
-                            onChange={(e) => setEndLocation(e.target.value)}
-                            placeholder="Điểm đến..."
-                        />
-                    </div>
-                    <div className="problem-button">
-                        <Button onClick={handleMaps}>Đường đi</Button>
-                        <MyLocationOutlinedIcon className="problem-form__icon" />
+                <div className="incident_map">
+                    <div id="problem-map" className="problem-map"></div>
+                    <div className="problem-form">
+                        <div className="from-address">
+                            <input
+                                className="from-input"
+                                type="text"
+                                name="from"
+                                value={startLocation}
+                                onChange={(e) =>
+                                    setStartLocation(e.target.value)
+                                }
+                                placeholder="Điểm bắt đầu"
+                            />
+                            <input
+                                className="from-input"
+                                type="text"
+                                name="to"
+                                value={endLocation}
+                                onChange={(e) => setEndLocation(e.target.value)}
+                                placeholder="Điểm đến..."
+                            />
+                        </div>
+                        <div className="problem-button">
+                            <Button onClick={handleMaps}>Đường đi</Button>
+                            <MyLocationOutlinedIcon className="problem-form__icon" />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="problem-share">
-                <div className="problem-left">
-                    {dataRout.length > 0 && dataRout
-                        ? dataRout.map((item) => (
-                              <div key={item.id}>
-                                  <div className="problem-left__wrapp">
-                                      <span className="problem-avarta">
-                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
-                                      </span>
-                                      <div className="problem-content">
-                                          <h4 className="problem-name">
-                                              {item.name}
-                                          </h4>
-                                          <p className="problem-decs">
-                                              <strong>
-                                                  Tuyến đường gặp sự cố:
-                                              </strong>{" "}
-                                              {item.location}
-                                          </p>
-                                          <p className="problem-decs">
-                                              <strong>Loại sự cố:</strong>{" "}
-                                              {item.type}
-                                          </p>
-                                          <p className="problem-decs">
-                                              <strong>Mô tả sự cố:</strong>{" "}
-                                              {item.description}
-                                          </p>
-                                      </div>
-                                  </div>
-                              </div>
-                          ))
-                        : data.map((item) => (
-                              <div key={item.id}>
-                                  <div className="problem-left__wrapp">
-                                      <span className="problem-avarta">
-                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
-                                      </span>
-                                      <div className="problem-content">
-                                          <h4 className="problem-name">
-                                              {item.name}
-                                          </h4>
-                                          <p className="problem-decs">
-                                              <strong>
-                                                  Tuyến đường gặp sự cố:
-                                              </strong>{" "}
-                                              {item.location}
-                                          </p>
-                                          <p className="problem-decs">
-                                              <strong>Loại sự cố:</strong>{" "}
-                                              {item.type}
-                                          </p>
-                                          <p className="problem-decs">
-                                              <strong>Mô tả sự cố:</strong>{" "}
-                                              {item.description}
-                                          </p>
-                                      </div>
-                                  </div>
-                              </div>
-                          ))}
-                </div>
-
-                <div className="problem-right">
+            <div className="incident-form">
+                <div className="incident-form-left">
                     <h3 className="right-title">
                         Chia sẻ tuyến đường gặp sự cố
                     </h3>
@@ -236,6 +261,8 @@ const Incident = () => {
                                 Tên
                             </label>
                             <input
+                                disabled
+                                style={{ cursor: "no-drop" }}
                                 type="text"
                                 name="name"
                                 value={shareRoute.name}
@@ -309,10 +336,160 @@ const Incident = () => {
                             ></textarea>
                         </div>
                         <div className="right-btn">
-                            {/* <Button>Lấy tuyến đường hiện tại</Button> */}
+                            {/* <Button onClick={getCurrentPosition}>
+                                Lấy vị trí hiện tại
+                            </Button> */}
                             <Button>Chia sẻ</Button>
                         </div>
                     </form>
+                </div>
+
+                <div className="incident-form-right">
+                    <h3 className="right-title">Sở trường của bạn là gì?</h3>
+                    <form
+                        action=""
+                        className="problem-right__form"
+                        onSubmit={handleRescuer}
+                    >
+                        <div className="right-form">
+                            <label
+                                className="form-title"
+                                htmlFor="form-address"
+                            >
+                                Chuyên môn
+                            </label>
+                            <input
+                                type="text"
+                                name="specialty"
+                                value={rescuer.specialty}
+                                onChange={handleChangeSpecialty}
+                                id="form-address"
+                                className="form-input"
+                                placeholder="VD: Bơi lội, sửa xe..."
+                            />
+                        </div>
+                        <div className="right-form">
+                            <label className="form-title" htmlFor="form-type">
+                                Mô tả
+                            </label>
+                            <textarea
+                                name="description"
+                                value={rescuer.description}
+                                onChange={handleChangeSpecialty}
+                                id="form-content"
+                                className="form-input"
+                            ></textarea>
+                        </div>
+                        <div className="right-btn">
+                            <Button>Gửi</Button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div className="problem-share">
+                <div className="problem-left">
+                    <h2 className="problem-left-heading">
+                        Danh sách sự cố tuyến đường
+                    </h2>
+                    {dataRout.length > 0 && dataRout
+                        ? dataRout.map((item) => (
+                              <div
+                                  className="problem-left__wrapp"
+                                  key={item.id}
+                              >
+                                  <span className="problem-avarta">
+                                      <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                  </span>
+                                  <div className="problem-content">
+                                      <h4 className="problem-name">
+                                          {item.name}
+                                      </h4>
+                                      <p className="problem-decs">
+                                          <strong>
+                                              Tuyến đường gặp sự cố:
+                                          </strong>{" "}
+                                          {item.location}
+                                      </p>
+                                      <p className="problem-decs">
+                                          <strong>Loại sự cố:</strong>{" "}
+                                          {item.type}
+                                      </p>
+                                      <p className="problem-decs">
+                                          <strong>Mô tả sự cố:</strong>{" "}
+                                          {item.description}
+                                      </p>
+                                  </div>
+                              </div>
+                          ))
+                        : data.map((item) => (
+                              <div
+                                  className="problem-left__wrapp"
+                                  key={item.id}
+                              >
+                                  <span className="problem-avarta">
+                                      <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                  </span>
+                                  <div className="problem-content">
+                                      <h4 className="problem-name">
+                                          {item.name}
+                                      </h4>
+                                      <span>{item.updated_at}</span>
+                                      <p className="problem-decs">
+                                          <strong>
+                                              Tuyến đường gặp sự cố:
+                                          </strong>{" "}
+                                          {item.location}
+                                      </p>
+                                      <p className="problem-decs">
+                                          <strong>Loại sự cố:</strong>{" "}
+                                          {item.type}
+                                      </p>
+                                      <p className="problem-decs">
+                                          <strong>Mô tả sự cố:</strong>{" "}
+                                          {item.description}
+                                      </p>
+                                  </div>
+                              </div>
+                          ))}
+                </div>
+
+                <div className="problem-right">
+                    <h2 className="problem-left-heading">
+                        Danh sách người cứu hộ
+                    </h2>
+                    <div className="rescuer">
+                        {expertise.length > 0 ? (
+                            expertise.map((item) => (
+                                <div
+                                    className="problem-left__wrapp"
+                                    key={item.id}
+                                >
+                                    <span className="problem-avarta">
+                                        <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                    </span>
+                                    <div className="problem-content">
+                                        <h4 className="problem-name">
+                                            {userInfo.name}
+                                        </h4>
+                                        <p className="problem-decs">
+                                            <strong>Chuyên môn:</strong>{" "}
+                                            {item.specialty}
+                                        </p>
+                                        <p className="problem-decs">
+                                            {item.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="problem-left__wrapp">
+                                <p className="problem-decs">
+                                    Danh sách không có người cứu hộ
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
