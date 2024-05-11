@@ -14,6 +14,8 @@ import {
   message,
   Upload,
   notification,
+  Menu,
+  Avatar,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useForm, Controller } from "react-hook-form";
@@ -29,13 +31,20 @@ import {
   addProblemVersion1,
   addProblemVersion2,
 } from "../../features/Problems/problemsSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import goongjs from "@goongmaps/goong-js";
 import { GOONG_MAP_KEY } from "../../constants/constants";
 import { addImage } from "../../features/Uploads/uploadsSlice";
 import axios from "axios";
+import {
+  clearUserInfo,
+  getAllRescueNeeded,
+  getAllRescueSeeker,
+} from "../../features/Users/usersSlice";
+import Cookies from "js-cookie";
 
 const { Option } = Select;
+const { Text } = Typography;
 
 // Define yup validate
 const schema = yup.object().shape({
@@ -59,10 +68,15 @@ const schema = yup.object().shape({
 const Home = () => {
   // Redux State
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const userInfo = useSelector((state) => state?.user?.userInfo);
   const coordinates = useSelector(
     (state) => state?.user?.userInfo?.coordinates
   );
+
+  // New
+  const rescueNeededList = useSelector((state) => state?.user?.list);
+  const rescueSeekerList = useSelector((state) => state?.user?.listSeeker);
 
   // Constants
   let validLat = 0;
@@ -104,27 +118,70 @@ const Home = () => {
   const [valueAddress, setValueAddress] = useState("");
   const [imageUploaded, setImageUploaded] = useState(false);
 
+  // New
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isFirstMarkerClicked, setIsFirstMarkerClicked] = useState(false);
+  const [selectedRescueNeeded, setSelectedRescueNeeded] = useState(null);
+  const [popupIndex, setPopupIndex] = useState(null);
+  const [showDetailRescueNeeded, setShowDetailRescueNeeded] = useState(false);
+
   // useEffect add map
   useEffect(() => {
-    if (isLogin && hasCoordinates) {
-      goongjs.accessToken = GOONG_MAP_KEY;
-      const map = new goongjs.Map({
-        container: "map",
-        style: "https://tiles.goong.io/assets/goong_map_web.json",
-        center: markerPosition,
-        zoom: 9,
-      });
+    goongjs.accessToken = GOONG_MAP_KEY;
 
+    // Tạo một biến để lưu trữ vị trí trung tâm mặc định
+    let defaultCenter = [106.70105355500004, 10.776553100000058];
+
+    // Kiểm tra xem markerPosition có giá trị [0, 0] không
+    if (markerPosition[0] === 0 && markerPosition[1] === 0) {
+      defaultCenter = [106.70105355500004, 10.776553100000058];
+    }
+
+    const map = new goongjs.Map({
+      container: "map",
+      style: "https://tiles.goong.io/assets/goong_map_web.json",
+      center: defaultCenter,
+      zoom: 9,
+    });
+
+    const marker = new goongjs.Marker({ color: "red" })
+      .setLngLat(markerPosition)
+      .addTo(map);
+
+    // Kiểm tra xem markerPosition có khác [0, 0] không trước khi thêm marker
+    if (markerPosition[0] !== 0 || markerPosition[1] !== 0) {
       const marker = new goongjs.Marker({ color: "red" })
         .setLngLat(markerPosition)
         .addTo(map);
 
-      return () => {
-        map.remove();
-        marker.remove();
-      };
+      map.flyTo({
+        center: markerPosition,
+        zoom: 13, // Bạn có thể tùy chỉnh mức độ zoom ở đây
+        essential: true, // Cần thiết để tránh lỗi khi sử dụng flyTo trong useEffect
+      });
     }
+
+    return () => {
+      map.remove();
+      marker.remove();
+    };
   }, [markerPosition, coordinates, hasCoordinates, isLogin]);
+
+  // New
+  useEffect(() => {
+    dispatch(getAllRescueNeeded());
+  }, [dispatch]);
+  useEffect(() => {
+    dispatch(getAllRescueSeeker());
+  }, [dispatch]);
+  useEffect(() => {
+    if (userInfo?.role === "ROLE_RESCUER") {
+      dispatch(clearUserInfo());
+      Cookies.remove("accessToken");
+      Cookies.remove("refreshToken");
+      navigate("/login");
+    }
+  }, [dispatch, userInfo?.role, navigate]);
 
   // Event Handlers
   const showModal = () => {
@@ -320,6 +377,18 @@ const Home = () => {
     }
   };
 
+  // New
+  const handleClick = async (item, index) => {
+    setSelectedItem(item.id);
+    setSelectedRescueNeeded(item);
+    const { lat, lng } = JSON.parse(item.coordinates);
+    setMarkerPosition([lng, lat]);
+  };
+
+  console.log("setSelectedItem", selectedItem);
+  console.log("setSelectedRescueNeeded", selectedRescueNeeded);
+  console.log("setShowDetailRescueNeeded", showDetailRescueNeeded);
+
   return (
     <>
       <Breadcrumb
@@ -341,360 +410,212 @@ const Home = () => {
             background: borderRadiusLG,
           }}
         >
-          {showDanger && !showMap && (
-            <Row
-              style={{
-                height: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Col
-                span={24}
-                style={{
-                  height: "100%",
-                  borderRadius: "10px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Image
-                  src="https://cdni.iconscout.com/illustration/premium/thumb/sos-message-emergency-9272237-7558474.png?f=webp"
-                  preview={false}
-                  style={{ maxWidth: "100%", height: "auto" }}
-                />
-              </Col>
-            </Row>
-          )}
-
           <Row
+            gutter={[16, 16]}
             style={{
               height: "auto",
               background: borderRadiusLG,
             }}
           >
-            {showDanger && !showMap && (
-              <>
-                {successMessage && username && password && (
-                  <Col
-                    span={24}
-                    style={{
-                      height: "auto",
-                      background: "#fff",
-                      borderRadius: "10px",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <Col
-                      span={22}
-                      style={{
-                        height: "auto",
-                        background: "#fff",
-                        borderRadius: "10px",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        flexDirection: "column",
-                        gap: "5px",
-                        margin: "10px 0",
-                      }}
-                    >
-                      <Typography.Text
-                        type="success"
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        {successMessage}
-                      </Typography.Text>
-
-                      <>
-                        <Typography.Text>Tài khoản: {username}</Typography.Text>
-                        <Typography.Text>Mật khẩu: {password}</Typography.Text>
-                      </>
-
-                      <Button type="primary">
-                        <Link to="/login">Đăng nhập ngay</Link>
-                      </Button>
-                    </Col>
-                  </Col>
-                )}
-
-                {!successMessage && !username && !password && (
-                  <Col
-                    span={24}
-                    style={{
-                      background: borderRadiusLG,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      flexDirection: "column",
-                      gap: "10px",
-                    }}
-                  >
-                    <Button type="primary" onClick={showModal}>
-                      Cần cứu hộ
-                    </Button>
-                    <Typography.Text
-                      type="danger"
-                      style={{
-                        textAlign: "center",
-                      }}
-                    >
-                      Nhấn vào nút 'Cần cứu hộ' để cung cấp thông tin và vị trí
-                      cần cứu hộ khẩn cấp.
-                    </Typography.Text>
-                  </Col>
-                )}
-              </>
-            )}
-            {isLogin && showMap && (
-              <Col
-                xs={24}
-                sm={24}
-                md={24}
-                lg={24}
-                xl={24}
-                style={{
-                  height: "400px",
-                  background: borderRadiusLG,
-                }}
-              >
-                <div id="map" style={{ width: "100%", height: "100%" }}></div>
-              </Col>
-            )}
-            <Modal
-              title={
-                <div style={{ textAlign: "center" }}>
-                  Thông tin người cần cứu hộ
-                </div>
-              }
-              open={isModalOpen}
-              onCancel={handleCancel}
-              centered
-              closeIcon={null}
-              footer={[]}
+            {/* New */}
+            <Col
+              xs={24}
+              sm={24}
+              md={24}
+              lg={6}
+              xl={6}
+              style={{
+                height: "500px",
+                background: "white",
+                color: "black",
+                border: "1px solid rgba(248, 11, 11, 0.06)",
+                borderRadius: "10px",
+              }}
             >
-              <Form
-                labelCol={{
-                  span: 6,
-                }}
-                wrapperCol={{
-                  span: 18,
-                }}
-                layout="horizontal"
+              <Col
                 style={{
-                  marginTop: "25px",
-                }}
-              >
-                <Controller
-                  name="name"
-                  control={control}
-                  defaultValue={userInfo?.name || ""}
-                  render={({ field }) => (
-                    <Form.Item
-                      label="Họ và tên"
-                      validateStatus={errors.name ? "error" : ""}
-                      help={errors.name ? errors.name.message : ""}
-                    >
-                      <Input
-                        {...field}
-                        placeholder="Nhập họ và tên"
-                        disabled={userInfo?.name}
-                      />
-                    </Form.Item>
-                  )}
-                />
-
-                <Controller
-                  name="phone"
-                  control={control}
-                  render={({ field }) => (
-                    <Form.Item
-                      label="Số điện thoại"
-                      validateStatus={errors.phone ? "error" : ""}
-                      help={errors.phone ? errors.phone.message : ""}
-                    >
-                      <Input {...field} placeholder="Nhập số điện thoại" />
-                    </Form.Item>
-                  )}
-                />
-
-                <Controller
-                  name="type"
-                  control={control}
-                  render={({ field }) => (
-                    <Form.Item
-                      label="Kiểu gặp nạn"
-                      validateStatus={errors.type ? "error" : ""}
-                      help={errors.type ? errors.type.message : ""}
-                    >
-                      <Select
-                        placeholder="Vui lòng chọn kiểu gặp nạn"
-                        onChange={handleChangeType}
-                      >
-                        <Option value="Thiên tai">Thiên tai</Option>
-                        <Option value="Sự cố">Sự cố</Option>
-                      </Select>
-                    </Form.Item>
-                  )}
-                />
-
-                {emergencyType === "Thiên tai" && (
-                  <>
-                    <Controller
-                      name="naturalDisasterName"
-                      control={control}
-                      render={({ field }) => (
-                        <Form.Item
-                          label="Tên thiên tai"
-                          validateStatus={
-                            errors.naturalDisasterName ? "error" : ""
-                          }
-                          help={
-                            errors.naturalDisasterName
-                              ? errors.naturalDisasterName.message
-                              : ""
-                          }
-                        >
-                          <Input {...field} placeholder="Nhập tên thiên tai" />
-                        </Form.Item>
-                      )}
-                    />
-
-                    <Controller
-                      name="naturalDisasterType"
-                      control={control}
-                      render={({ field }) => (
-                        <Form.Item
-                          label="Loại thiên tai"
-                          validateStatus={
-                            errors.naturalDisasterType ? "error" : ""
-                          }
-                          help={
-                            errors.naturalDisasterType
-                              ? errors.naturalDisasterType.message
-                              : ""
-                          }
-                        >
-                          <Input {...field} placeholder="Nhập loại thiên tai" />
-                        </Form.Item>
-                      )}
-                    />
-                  </>
-                )}
-
-                {emergencyType === "Sự cố" && (
-                  <>
-                    <Controller
-                      name="incidentName"
-                      control={control}
-                      render={({ field }) => (
-                        <Form.Item
-                          label="Tên sự cố"
-                          validateStatus={errors.incidentName ? "error" : ""}
-                          help={
-                            errors.incidentName
-                              ? errors.incidentName.message
-                              : ""
-                          }
-                        >
-                          <Input {...field} placeholder="Nhập tên sự cố" />
-                        </Form.Item>
-                      )}
-                    />
-
-                    <Controller
-                      name="incidentType"
-                      control={control}
-                      render={({ field }) => (
-                        <Form.Item
-                          label="Loại sự cố"
-                          validateStatus={errors.incidentType ? "error" : ""}
-                          help={
-                            errors.incidentType
-                              ? errors.incidentType.message
-                              : ""
-                          }
-                        >
-                          <Input {...field} placeholder="Nhập loại sự cố" />
-                        </Form.Item>
-                      )}
-                    />
-                  </>
-                )}
-
-                <Controller
-                  name="address"
-                  control={control}
-                  render={({ field }) => (
-                    <Form.Item
-                      label="Địa chỉ"
-                      validateStatus={errors.address ? "error" : ""}
-                      help={errors.address ? errors.address.message : ""}
-                    >
-                      <Input
-                        {...field}
-                        placeholder="Nhập địa chỉ"
-                        value={valueAddress} // Đặt giá trị của input "address"
-                        onChange={(e) => setValueAddress(e.target.value)}
-                      />
-                    </Form.Item>
-                  )}
-                />
-              </Form>
-
-              <Row
-                style={{
+                  height: "50px",
                   display: "flex",
-                  justifyContent: "end",
+                  justifyContent: "center",
                   alignItems: "center",
-                  marginBottom: "15px",
+                  borderBottom: "1px solid rgba(5, 5, 5, 0.06)",
                 }}
               >
-                <Button onClick={getCurrentPosition}>Vị trí hiện tại</Button>
-              </Row>
-
-              <Row
-                style={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                }}
-              >
-                <Upload
-                  beforeUpload={beforeUpload}
-                  customRequest={handleUpload}
-                  accept="image/*"
+                <Typography.Title
+                  level={1}
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "700",
+                    color: "black",
+                    marginLeft: "10px",
+                    marginBottom: 0,
+                  }}
                 >
-                  <Button icon={<UploadOutlined />}>Thêm hình ảnh</Button>
-                </Upload>
-              </Row>
+                  Danh sách người cần cứu hộ
+                </Typography.Title>
+              </Col>
+              <Menu
+                mode="inline"
+                style={{ height: "450px", overflowY: "auto" }}
+                // selectedKeys={selectedItem ? [String(selectedItem)] : []}
+                // disabled={!isFirstMarkerClicked}
+              >
+                {rescueNeededList.map((item) => (
+                  <Menu.Item
+                    key={String(item.id)}
+                    onClick={() => handleClick(item)}
+                    style={{
+                      height: "145px",
+                      border: "1px solid rgba(5, 5, 5, 0.06)",
+                    }}
+                  >
+                    <Row>
+                      <Col span={4}>
+                        <Avatar src={item.avatar} size={40} />
+                      </Col>
+                      <Col span={20}>
+                        <Text style={{ display: "block", marginBottom: "5px" }}>
+                          {item.name}
+                        </Text>
+                        <Text
+                          type="secondary"
+                          style={{ display: "block", fontSize: "13px" }}
+                        >
+                          Số điện thoại: {item.phone}
+                        </Text>
+                        <Text
+                          type="secondary"
+                          style={{ display: "block", fontSize: "13px" }}
+                        >
+                          Kiểu gặp nạn:{" "}
+                          {item.disaster_name || item.problem_name}
+                        </Text>
+                        <Text
+                          type="secondary"
+                          style={{ display: "block", fontSize: "13px" }}
+                        >
+                          Địa chỉ: {item.address}
+                        </Text>
+                        <Text
+                          type="secondary"
+                          style={{ display: "block", fontSize: "13px" }}
+                        >
+                          Trạng thái:{" "}
+                          {item.disaster_status || item.problem_status}
+                        </Text>
+                      </Col>
+                    </Row>
+                  </Menu.Item>
+                ))}
+              </Menu>
+            </Col>
 
-              <Row
+            <Col
+              xs={24}
+              sm={24}
+              md={24}
+              lg={12}
+              xl={12}
+              style={{
+                height: "500px",
+                background: borderRadiusLG,
+              }}
+            >
+              <div id="map" style={{ width: "100%", height: "100%" }}></div>
+            </Col>
+
+            {/* New */}
+            <Col
+              xs={24}
+              sm={24}
+              md={24}
+              lg={6}
+              xl={6}
+              style={{
+                height: "500px",
+                background: "white",
+                color: "black",
+                border: "1px solid rgba(5, 5, 5, 0.06)",
+                borderRadius: "10px",
+              }}
+            >
+              <Col
                 style={{
+                  height: "50px",
                   display: "flex",
-                  justifyContent: "end",
+                  justifyContent: "center",
                   alignItems: "center",
-                  gap: "10px",
+                  borderBottom: "1px solid rgba(5, 5, 5, 0.06)",
                 }}
               >
-                <Button onClick={handleCancel}>Trở về</Button>
-                <Button
-                  type="primary"
-                  onClick={handleSubmit(onSubmit)}
-                  loading={loading}
+                <Typography.Title
+                  level={1}
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "700",
+                    color: "black",
+                    marginLeft: "10px",
+                    marginBottom: 0,
+                  }}
                 >
-                  {loading ? "Đang gửi..." : "Gửi thông tin"}
-                </Button>
-              </Row>
-            </Modal>
+                  Danh sách người cứu hộ
+                </Typography.Title>
+              </Col>
+              <Menu
+                mode="inline"
+                style={{ height: "450px", overflowY: "auto" }}
+                // selectedKeys={selectedItem ? [String(selectedItem)] : []}
+                disabled={true}
+              >
+                {rescueSeekerList.map((item) => (
+                  <Menu.Item
+                    key={String(item.id)}
+                    // onClick={() => handleClick(item)}
+                    style={{
+                      height: "145px",
+                      border: "1px solid rgba(5, 5, 5, 0.06)",
+                    }}
+                  >
+                    <Row>
+                      <Col span={4}>
+                        <Avatar src={item.avatar} size={40} />
+                      </Col>
+                      <Col span={20}>
+                        <Text style={{ display: "block", marginBottom: "5px" }}>
+                          {item.name}
+                        </Text>
+                        <Text
+                          type="secondary"
+                          style={{ display: "block", fontSize: "13px" }}
+                        >
+                          Số điện thoại: {item.phone || "Chưa cập nhật"}
+                        </Text>
+                        {/* <Text
+                          type="secondary"
+                          style={{ display: "block", fontSize: "13px" }}
+                        >
+                          Kiểu gặp nạn:{" "}
+                          {item.disaster_name || item.problem_name}
+                        </Text>
+                        <Text
+                          type="secondary"
+                          style={{ display: "block", fontSize: "13px" }}
+                        >
+                          Địa chỉ: {item.address}
+                        </Text>
+                        <Text
+                          type="secondary"
+                          style={{ display: "block", fontSize: "13px" }}
+                        >
+                          Trạng thái:{" "}
+                          {item.disaster_status || item.problem_status}
+                        </Text> */}
+                      </Col>
+                    </Row>
+                  </Menu.Item>
+                ))}
+              </Menu>
+            </Col>
           </Row>
         </Col>
       </Row>

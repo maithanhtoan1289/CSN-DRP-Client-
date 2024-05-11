@@ -42,6 +42,17 @@ const userApi = {
     }
   },
 
+  // New
+  getAllRescueSeeker: async () => {
+    const url = `/users/rescue-seeker`;
+    try {
+      const response = await axiosClient.get(url);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getAllRescueHistory: async () => {
     const url = `/users/rescue-history`;
     try {

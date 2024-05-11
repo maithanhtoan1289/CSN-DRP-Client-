@@ -17,7 +17,9 @@ axiosFormData.interceptors.request.use(
       config.url.includes("/problems/v1/add") ||
       config.url.includes("/natural-disasters/v2/add") ||
       config.url.includes("/problems/v2/add") ||
-      config.url.includes("/upload/add-image")
+      config.url.includes("/upload/add-image") ||
+      config.url.includes("/users/rescue-needed") ||
+      config.url.includes("/users/rescue-seeker")
     ) {
       return config;
     }
