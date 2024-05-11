@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { direction, geocoding } from "../../features/Goong/goongSlice";
 import {
   addCoordinates,
+  clearUserInfo,
   getAllRescueNeeded,
 } from "../../features/Users/usersSlice";
 import goongjs from "@goongmaps/goong-js";
@@ -29,6 +30,8 @@ import polyline from "@mapbox/polyline";
 import { addNaturalDisasterStatus } from "../../features/NaturalDisaster/naturalDisastersSlice";
 import { addProblemStatus } from "../../features/Problems/problemsSlice";
 import { GOONG_MAP_KEY } from "../../constants/constants";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -52,6 +55,10 @@ const RescueSeeker = () => {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state?.user?.userInfo?.id);
   const rescueNeededList = useSelector((state) => state?.user?.list);
+
+  // New
+  const navigate = useNavigate();
+  const userInfo = useSelector((state) => state?.user?.userInfo);
 
   // Ant design
   const {
@@ -228,6 +235,16 @@ const RescueSeeker = () => {
     polylinePoints,
     isFirstMarkerClicked,
   ]);
+
+  // New
+  useEffect(() => {
+    if (userInfo?.role === "ROLE_USER") {
+      dispatch(clearUserInfo());
+      Cookies.remove("accessToken");
+      Cookies.remove("refreshToken");
+      navigate("/login");
+    }
+  }, [dispatch, userInfo?.role, navigate]);
 
   // Event Handlers
   const showModal = () => {

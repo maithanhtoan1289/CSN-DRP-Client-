@@ -8,6 +8,7 @@ const initialState = {
   currentPage: null,
   limit: null,
   list: [],
+  listSeeker: [],
   status: "initial",
   error: null,
 };
@@ -76,6 +77,19 @@ export const getAllRescueNeeded = createAsyncThunk(
   }
 );
 
+// New
+export const getAllRescueSeeker = createAsyncThunk(
+  "user/getAllRescueSeeker",
+  async () => {
+    try {
+      const response = await userApi.getAllRescueSeeker();
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 export const getAllRescueHistory = createAsyncThunk(
   "user/getAllRescueHistory",
   async () => {
@@ -94,6 +108,11 @@ const userSlice = createSlice({
   reducers: {
     setUserInfo: (state, action) => {
       state.userInfo = action.payload;
+    },
+
+    // New
+    clearUserInfo: (state, action) => {
+      state.userInfo = null;
     },
   },
   extraReducers: (builder) => {
@@ -262,6 +281,36 @@ const userSlice = createSlice({
         state.error = action.error.message;
       })
 
+      // New
+      // Get all rescue seeker
+      .addCase(getAllRescueSeeker.pending, (state) => {
+        // state.userInfo = null;
+        state.totalPages = null;
+        state.currentPage = null;
+        state.limit = null;
+        state.listSeeker = [];
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(getAllRescueSeeker.fulfilled, (state, action) => {
+        // state.userInfo = null;
+        state.totalPages = null;
+        state.currentPage = null;
+        state.limit = null;
+        state.listSeeker = action.payload.data.rows;
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(getAllRescueSeeker.rejected, (state, action) => {
+        // state.userInfo = null;
+        state.totalPages = null;
+        state.currentPage = null;
+        state.limit = null;
+        state.listSeeker = [];
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+
       // Get all rescue history
       .addCase(getAllRescueHistory.pending, (state) => {
         // state.userInfo = null;
@@ -293,5 +342,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUserInfo } = userSlice.actions;
+// New
+export const { setUserInfo, clearUserInfo } = userSlice.actions;
 export default userSlice.reducer;

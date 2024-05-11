@@ -18,7 +18,7 @@ const rootReducer = {
   historyProblem: historyProblemReducer,
   uploads: uploadsReducer,
 };
-
+//test
 const store = configureStore({
   reducer: rootReducer,
 });
