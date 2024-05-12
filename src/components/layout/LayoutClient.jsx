@@ -95,6 +95,7 @@ const items = [
   getItem("Tin tức", "/news", "/news"),
   getItem("Vấn đề", "/problem", "/problem"),
   getItem("Cứu hộ", "/rescue-seeker", "/rescue-seeker"),
+  getItem("Sự cố", "/incident", "/incident"),
 ];
 
 const HeaderComponent = ({ children }) => {
@@ -561,6 +562,15 @@ const HeaderComponent = ({ children }) => {
                   />
                   <Text style={{ color: "white", marginLeft: "4px" }}>
                     Cứu hộ
+                  </Text>
+                </Link>
+
+                <Link to="/incident">
+                  <ThunderboltOutlined
+                    style={{ fontSize: "20px", color: "white" }}
+                  />
+                  <Text style={{ color: "white", marginLeft: "4px" }}>
+                    Sự Cố
                   </Text>
                 </Link>
               </Col>
