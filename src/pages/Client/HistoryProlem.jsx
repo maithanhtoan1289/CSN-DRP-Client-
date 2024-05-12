@@ -45,9 +45,8 @@ const HistoryProlem = () => {
                                 <HistoryProblemItem
                                     key={item.id}
                                     id={item.id}
-                                    nameUser={item.name}
+                                    name={item.name}
                                     location={item.location}
-                                    type={item.type}
                                     description={item.description}
                                     dataIncident={dataIncident}
                                 />
