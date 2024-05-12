@@ -28,6 +28,7 @@ import {
     ThunderboltOutlined,
     ProfileOutlined,
     UploadOutlined,
+    ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { Grid } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -192,7 +193,13 @@ const HeaderComponent = ({ children }) => {
                     Lịch sử cứu hộ
                 </Menu.Item>
             )}
-            <Menu.Item key="2" onClick={handleLogout}>
+            <Menu.Item key="2">
+                <Link to="/infomation-user">Hồ sơ cá nhân</Link>
+            </Menu.Item>
+            <Menu.Item key="3">
+                <Link to="/history-incedent">Lịch sử hoạt động</Link>
+            </Menu.Item>
+            <Menu.Item key="4" onClick={handleLogout}>
                 Đăng xuất
             </Menu.Item>
         </Menu>
@@ -638,7 +645,7 @@ const HeaderComponent = ({ children }) => {
                                     </Text>
                                 </Link>
                                 <Link to="/incident">
-                                    <ThunderboltOutlined
+                                    <ExclamationCircleOutlined
                                         style={{
                                             fontSize: "20px",
                                             color: "white",
@@ -650,7 +657,7 @@ const HeaderComponent = ({ children }) => {
                                             marginLeft: "4px",
                                         }}
                                     >
-                                        sự cố
+                                        Sự cố
                                     </Text>
                                 </Link>
                             </Col>
