@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import "../sass/historyProlem.scss";
 import HistoryProblemItem from "./HistoryProblemItem";
-import SpecialtyItem from "./SpecialtyItem";
 
 const HistoryProlem = () => {
     const accessToken = Cookies.get("accessToken");
@@ -14,11 +13,9 @@ const HistoryProlem = () => {
         },
     };
     const [data, setData] = useState([]);
-    const [specialityData, setSpecialityData] = useState([]);
 
     useEffect(() => {
         dataIncident();
-        dataSpeciality();
     }, []);
 
     const dataIncident = async () => {
@@ -30,19 +27,6 @@ const HistoryProlem = () => {
             setData(res.data.data);
         } catch (err) {
             console.log(err);
-        }
-    };
-
-    const dataSpeciality = async () => {
-        try {
-            const res = await axios.get(
-                "http://localhost:5000/api/expertise/getExpertise",
-                token
-            );
-            console.log(res.data.data);
-            setSpecialityData(res.data.data);
-        } catch (e) {
-            console.log(e);
         }
     };
 
@@ -66,23 +50,6 @@ const HistoryProlem = () => {
                                     type={item.type}
                                     description={item.description}
                                     dataIncident={dataIncident}
-                                />
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="history-problem-incident">
-                        <h3 className="history-problem__heading">
-                            Chuyên môn của bạn
-                        </h3>
-                        <div className="incident-item">
-                            {specialityData.map((item) => (
-                                <SpecialtyItem
-                                    key={item.id}
-                                    id={item.id}
-                                    specialty={item.specialty}
-                                    description={item.description}
-                                    dataSpeciality={dataSpeciality}
                                 />
                             ))}
                         </div>
