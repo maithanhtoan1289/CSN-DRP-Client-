@@ -52,6 +52,14 @@ a {
     width: 1200px;
     margin: 0 auto;
 
+    .form-flex {
+        display: flex;
+    }
+
+    .history-problem-incident {
+        width: 50%;
+    }
+
     .form-manage {
 
         .form-heading {
@@ -72,7 +80,8 @@ a {
             width: 340px;
             padding: 8px 16px;
             margin: 4px 0 20px;
-            font-size: 1.6rem;
+            font-size: 1.6rem;resize: vertical;
+            max-height: 250px;
         }
 
         .account-manager__form {
@@ -96,5 +105,11 @@ a {
             height: 16px;
             margin-right: 6px;
         }
+
+        .incident-form-right {
+            width: 50%;
+        }
+
+        
     }
 }

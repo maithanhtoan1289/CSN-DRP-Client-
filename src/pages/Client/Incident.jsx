@@ -60,31 +60,56 @@ const Incident = () => {
     const [data, setData] = useState([]);
     const [dataRout, setDataRout] = useState([]);
     const [expertise, setExpertise] = useState([]);
-    const [rescuer, setRescuer] = useState({ specialty: "", description: "" });
+    const [selectedOption, setSelectedOption] = useState("related");
+    const [routeError, setRouteError] = useState({});
+
+    const isValue = (value) => {
+        return !value || value.trim().length < 1;
+    };
+
+    const validateFormRoute = () => {
+        const error = {};
+
+        if (isValue(shareRoute.location)) {
+            error["location"] = "Vui lòng nhập địa chỉ";
+        }
+        if (isValue(shareRoute.type)) {
+            error["type"] = "Vui lòng nhập loại sự cố";
+        }
+        if (isValue(shareRoute.description)) {
+            error["description"] = "Vui lòng mô tả sự cố";
+        }
+        setRouteError(error);
+
+        return Object.keys(error).length === 0;
+    };
 
     useEffect(() => {
         dataIncident();
         dataRescuer();
-    }, []);
+    }, [selectedOption]);
 
     const handleMaps = async () => {
-        const hashtags = { startLocation, endLocation };
-        if (startLocation === "" || endLocation === "") {
-            alert("Bạn cần nhập điểm bắt đầu và điểm đến");
-        }
-
         try {
-            const res = await axios.post(
-                "http://localhost:5000/api/incident/find",
-                hashtags,
-                token
-            );
-            setDataRout(res.data.data);
-            const checkProblem = res.data.data.length;
-            if (checkProblem > 0) {
-                message.warning("Tuyến đường này đang gặp sự cố");
+            const hashtags = { startLocation, endLocation };
+
+            if (startLocation === "" || endLocation === "") {
+                message.warning("Bạn cần nhập điểm bắt đầu và điểm đến");
             } else {
-                message.success("tuyến đường này không gặp sự cố");
+                const res = await axios.post(
+                    "http://localhost:5000/api/incident/find",
+                    hashtags,
+                    token
+                );
+
+                setDataRout(res.data.data);
+                const checkProblem = res.data.data.length;
+
+                if (checkProblem > 0) {
+                    message.warning("Tuyến đường này đang gặp sự cố");
+                } else {
+                    message.success("tuyến đường này không gặp sự cố");
+                }
             }
         } catch (err) {
             console.log(err);
@@ -113,26 +138,20 @@ const Incident = () => {
         });
     };
 
-    const handleChangeSpecialty = (e) => {
-        const { value, name } = e.target;
-        setRescuer({
-            ...rescuer,
-            [name]: value,
-        });
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(
-                "http://localhost:5000/api/incident/shareIncident",
-                shareRoute,
-                token
-            );
+            if (validateFormRoute()) {
+                await axios.post(
+                    "http://localhost:5000/api/incident/shareIncident",
+                    shareRoute,
+                    token
+                );
 
-            dataIncident();
-            setShareRoute(initFormShareRoute);
-            message.success("Chia sẻ thành công");
+                dataIncident();
+                setShareRoute(initFormShareRoute);
+                message.success("Chia sẻ thành công");
+            }
         } catch (e) {
             message.error(
                 "Bạn chưa đăng nhập hoặc chưa điền thông tin vào form"
@@ -142,26 +161,19 @@ const Incident = () => {
 
     const dataRescuer = async () => {
         try {
-            const res = await axios.get(
-                "http://localhost:5000/api/expertise/getExpertise",
-                token
-            );
-            setExpertise(res.data.data);
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const handleRescuer = async (e) => {
-        e.preventDefault();
-        try {
-            await axios.post(
-                "http://localhost:5000/api/expertise/create",
-                rescuer,
-                token
-            );
-            setRescuer({ specialty: "", description: "" });
-            dataRescuer();
+            if (selectedOption === "related") {
+                const res = await axios.get(
+                    "http://localhost:5000/api/expertise/related",
+                    token
+                );
+                setExpertise(res.data.incidents);
+            } else if (selectedOption === "userRproblem") {
+                const res = await axios.get(
+                    "http://localhost:5000/api/expertise/userRproblem",
+                    token
+                );
+                setExpertise(res.data.relatedUsers);
+            }
         } catch (e) {
             console.log(e);
         }
@@ -241,9 +253,6 @@ const Incident = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div className="incident-form">
                 <div className="incident-form-left">
                     <h3 className="right-title">
                         Chia sẻ tuyến đường gặp sự cố
@@ -286,6 +295,11 @@ const Incident = () => {
                                 id="form-address"
                                 className="form-input"
                             />
+                            {routeError.location && (
+                                <span className="route-error">
+                                    {routeError.location}
+                                </span>
+                            )}
                         </div>
                         <div className="right-form">
                             <label className="form-title" htmlFor="form-type">
@@ -299,6 +313,11 @@ const Incident = () => {
                                 id="form-type"
                                 className="form-input"
                             />
+                            {routeError.type && (
+                                <span className="route-error">
+                                    {routeError.type}
+                                </span>
+                            )}
                         </div>
                         <div className="right-form">
                             <label className="form-title" htmlFor="form-type">
@@ -334,54 +353,17 @@ const Incident = () => {
                                 className="form-input"
                                 placeholder="VD: tuyến đường ... đang gặp sự cố ..."
                             ></textarea>
+                            {routeError.description && (
+                                <span className="route-error">
+                                    {routeError.description}
+                                </span>
+                            )}
                         </div>
                         <div className="right-btn">
                             {/* <Button onClick={getCurrentPosition}>
                                 Lấy vị trí hiện tại
                             </Button> */}
                             <Button>Chia sẻ</Button>
-                        </div>
-                    </form>
-                </div>
-
-                <div className="incident-form-right">
-                    <h3 className="right-title">Sở trường của bạn là gì?</h3>
-                    <form
-                        action=""
-                        className="problem-right__form"
-                        onSubmit={handleRescuer}
-                    >
-                        <div className="right-form">
-                            <label
-                                className="form-title"
-                                htmlFor="form-address"
-                            >
-                                Chuyên môn
-                            </label>
-                            <input
-                                type="text"
-                                name="specialty"
-                                value={rescuer.specialty}
-                                onChange={handleChangeSpecialty}
-                                id="form-address"
-                                className="form-input"
-                                placeholder="VD: Bơi lội, sửa xe..."
-                            />
-                        </div>
-                        <div className="right-form">
-                            <label className="form-title" htmlFor="form-type">
-                                Mô tả
-                            </label>
-                            <textarea
-                                name="description"
-                                value={rescuer.description}
-                                onChange={handleChangeSpecialty}
-                                id="form-content"
-                                className="form-input"
-                            ></textarea>
-                        </div>
-                        <div className="right-btn">
-                            <Button>Gửi</Button>
                         </div>
                     </form>
                 </div>
@@ -458,9 +440,29 @@ const Incident = () => {
                     <h2 className="problem-left-heading">
                         Danh sách người cứu hộ
                     </h2>
+                    <div className="select-status">
+                        <label className="form-title" htmlFor="form-type">
+                            Trạng thái
+                        </label>
+                        <select
+                            id="form-type"
+                            className="form-input"
+                            name="status"
+                            value={selectedOption}
+                            onChange={(e) => setSelectedOption(e.target.value)}
+                        >
+                            <option value="related">
+                                sự cố liên quan sở trường
+                            </option>
+                            <option value="userRproblem">
+                                sự cố bạn có thể cần
+                            </option>
+                        </select>
+                    </div>
+
                     <div className="rescuer">
-                        {expertise.length > 0 ? (
-                            expertise.map((item) => (
+                        {expertise && expertise.length > 0 ? (
+                            expertise.slice(0, 7).map((item) => (
                                 <div
                                     className="problem-left__wrapp"
                                     key={item.id}
@@ -470,14 +472,15 @@ const Incident = () => {
                                     </span>
                                     <div className="problem-content">
                                         <h4 className="problem-name">
-                                            {userInfo.name}
+                                            {item.name}
                                         </h4>
                                         <p className="problem-decs">
-                                            <strong>Chuyên môn:</strong>{" "}
-                                            {item.specialty}
+                                            <strong>Địa chỉ:</strong>{" "}
+                                            {item.user_address}
                                         </p>
                                         <p className="problem-decs">
-                                            {item.description}
+                                            <strong>SĐT:</strong>{" "}
+                                            {item.user_phone}
                                         </p>
                                     </div>
                                 </div>

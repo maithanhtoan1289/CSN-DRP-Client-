@@ -2,7 +2,9 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import Button from "../Client/Button";
+import SpecialtyItem from "./SpecialtyItem";
 import "../sass/inforUser.scss";
+import { message } from "antd";
 
 const InforUser = () => {
     const accessToken = Cookies.get("accessToken");
@@ -22,9 +24,12 @@ const InforUser = () => {
 
     const [userInfo, setuserInfo] = useState(initInfo);
     const [profile, setProfile] = useState([]);
+    const [rescuer, setRescuer] = useState({ specialty: "", description: "" });
+    const [specialityData, setSpecialityData] = useState([]);
 
     useEffect(() => {
         dataProfile();
+        dataSpeciality();
     }, []);
 
     const handleChange = (e) => {
@@ -61,6 +66,43 @@ const InforUser = () => {
             console.log(res.data.data);
         } catch (err) {
             console.log(err);
+        }
+    };
+
+    const handleChangeSpecialty = (e) => {
+        const { value, name } = e.target;
+        setRescuer({
+            ...rescuer,
+            [name]: value,
+        });
+    };
+
+    const handleRescuer = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post(
+                "http://localhost:5000/api/expertise/create",
+                rescuer,
+                token
+            );
+            setRescuer({ specialty: "", description: "" });
+            message.success("Gửi thành công");
+            dataSpeciality();
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    const dataSpeciality = async () => {
+        try {
+            const res = await axios.get(
+                "http://localhost:5000/api/expertise/getExpertise",
+                token
+            );
+            console.log(res.data.data);
+            setSpecialityData(res.data.data);
+        } catch (e) {
+            console.log(e);
         }
     };
 
@@ -132,6 +174,66 @@ const InforUser = () => {
 
                 <Button>Cập nhật</Button>
             </form>
+
+            <div className="form-manage wrapp-form form-flex">
+                <div className="incident-form-right">
+                    <h3 className="form-heading">Chuyên môn của bạn là gì?</h3>
+                    <form
+                        action=""
+                        className="problem-right__form"
+                        onSubmit={handleRescuer}
+                    >
+                        <div className="form-information">
+                            <label
+                                className="form-title"
+                                htmlFor="form-address"
+                            >
+                                Chuyên môn
+                            </label>
+                            <input
+                                type="text"
+                                name="specialty"
+                                value={rescuer.specialty}
+                                onChange={handleChangeSpecialty}
+                                id="form-address"
+                                className="form-input"
+                                placeholder="VD: Bơi lội, sửa xe..."
+                            />
+                        </div>
+                        <div className="form-information">
+                            <label className="form-title" htmlFor="form-type">
+                                Mô tả
+                            </label>
+                            <textarea
+                                name="description"
+                                value={rescuer.description}
+                                onChange={handleChangeSpecialty}
+                                id="form-content"
+                                className="form-input"
+                            ></textarea>
+                        </div>
+                        <div className="right-btn">
+                            <Button>Gửi</Button>
+                        </div>
+                    </form>
+                </div>
+
+                <div className="history-problem-incident">
+                    <h3 className="form-heading">Chuyên môn của bạn</h3>
+                    <div className="incident-item">
+                        {specialityData.map((item) => (
+                            <SpecialtyItem
+                                key={item.id}
+                                id={item.id}
+                                specialty={item.specialty}
+                                description={item.description}
+                                dataSpeciality={dataSpeciality}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+
             <div className="form-manage wrapp-form">
                 <h3 className="form-heading">Thay đổi mật khẩu của tôi</h3>
                 <form action="">
