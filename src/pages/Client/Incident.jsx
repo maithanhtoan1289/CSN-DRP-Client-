@@ -47,8 +47,8 @@ const Incident = () => {
     }, []);
 
     let initFormShareRoute = {
-        name: userInfo ? userInfo.name : "",
-        type: "",
+        name: "",
+        type: "abc",
         description: "",
         location: "",
         status: "chưa giải quyết",
@@ -62,6 +62,7 @@ const Incident = () => {
     const [expertise, setExpertise] = useState([]);
     const [selectedOption, setSelectedOption] = useState("related");
     const [routeError, setRouteError] = useState({});
+    const [helpMe, setHelpMe] = useState([]);
 
     const isValue = (value) => {
         return !value || value.trim().length < 1;
@@ -72,9 +73,6 @@ const Incident = () => {
 
         if (isValue(shareRoute.location)) {
             error["location"] = "Vui lòng nhập địa chỉ";
-        }
-        if (isValue(shareRoute.type)) {
-            error["type"] = "Vui lòng nhập loại sự cố";
         }
         if (isValue(shareRoute.description)) {
             error["description"] = "Vui lòng mô tả sự cố";
@@ -172,7 +170,7 @@ const Incident = () => {
                     "http://localhost:5000/api/expertise/userRproblem",
                     token
                 );
-                setExpertise(res.data.relatedUsers);
+                setHelpMe(res.data.relatedUsers);
             }
         } catch (e) {
             console.log(e);
@@ -267,13 +265,12 @@ const Incident = () => {
                                 className="form-title"
                                 htmlFor="form-address"
                             >
-                                Tên
+                                Sự cố
                             </label>
                             <input
-                                disabled
-                                style={{ cursor: "no-drop" }}
                                 type="text"
                                 name="name"
+                                placeholder="VD: Tắc đường, ..."
                                 value={shareRoute.name}
                                 onChange={handleChange}
                                 id="form-address"
@@ -301,7 +298,7 @@ const Incident = () => {
                                 </span>
                             )}
                         </div>
-                        <div className="right-form">
+                        {/* <div className="right-form">
                             <label className="form-title" htmlFor="form-type">
                                 Loại sự cố
                             </label>
@@ -318,7 +315,7 @@ const Incident = () => {
                                     {routeError.type}
                                 </span>
                             )}
-                        </div>
+                        </div> */}
                         <div className="right-form">
                             <label className="form-title" htmlFor="form-type">
                                 Trạng thái
@@ -385,7 +382,7 @@ const Incident = () => {
                                   </span>
                                   <div className="problem-content">
                                       <h4 className="problem-name">
-                                          {item.name}
+                                          {item.user_name}
                                       </h4>
                                       <p className="problem-decs">
                                           <strong>
@@ -395,7 +392,7 @@ const Incident = () => {
                                       </p>
                                       <p className="problem-decs">
                                           <strong>Loại sự cố:</strong>{" "}
-                                          {item.type}
+                                          {item.name}
                                       </p>
                                       <p className="problem-decs">
                                           <strong>Mô tả sự cố:</strong>{" "}
@@ -414,7 +411,7 @@ const Incident = () => {
                                   </span>
                                   <div className="problem-content">
                                       <h4 className="problem-name">
-                                          {item.name}
+                                          {item.user_name}
                                       </h4>
                                       <span>{item.updated_at}</span>
                                       <p className="problem-decs">
@@ -425,7 +422,7 @@ const Incident = () => {
                                       </p>
                                       <p className="problem-decs">
                                           <strong>Loại sự cố:</strong>{" "}
-                                          {item.type}
+                                          {item.name}
                                       </p>
                                       <p className="problem-decs">
                                           <strong>Mô tả sự cố:</strong>{" "}
@@ -437,13 +434,13 @@ const Incident = () => {
                 </div>
 
                 <div className="problem-right">
-                    <h2 className="problem-left-heading">
+                    {/* <h2 className="problem-left-heading">
                         Danh sách người cứu hộ
-                    </h2>
+                    </h2> */}
                     <div className="select-status">
-                        <label className="form-title" htmlFor="form-type">
+                        {/* <label className="form-title" htmlFor="form-type">
                             Trạng thái
-                        </label>
+                        </label> */}
                         <select
                             id="form-type"
                             className="form-input"
@@ -452,46 +449,71 @@ const Incident = () => {
                             onChange={(e) => setSelectedOption(e.target.value)}
                         >
                             <option value="related">
-                                sự cố liên quan sở trường
+                                Những người bạn có thể giúp
                             </option>
                             <option value="userRproblem">
-                                sự cố bạn có thể cần
+                                Những người có thể giúp bạn
                             </option>
                         </select>
                     </div>
 
                     <div className="rescuer">
-                        {expertise && expertise.length > 0 ? (
-                            expertise.slice(0, 7).map((item) => (
-                                <div
-                                    className="problem-left__wrapp"
-                                    key={item.id}
-                                >
-                                    <span className="problem-avarta">
-                                        <PersonOutlineOutlinedIcon className="avarta-icon" />
-                                    </span>
-                                    <div className="problem-content">
-                                        <h4 className="problem-name">
-                                            {item.name}
-                                        </h4>
-                                        <p className="problem-decs">
-                                            <strong>Địa chỉ:</strong>{" "}
-                                            {item.user_address}
-                                        </p>
-                                        <p className="problem-decs">
-                                            <strong>SĐT:</strong>{" "}
-                                            {item.user_phone}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="problem-left__wrapp">
-                                <p className="problem-decs">
-                                    Danh sách không có người cứu hộ
-                                </p>
-                            </div>
-                        )}
+                        {selectedOption === "related"
+                            ? expertise.length > 0 &&
+                              expertise.slice(0, 7).map((item) => (
+                                  <div
+                                      className="problem-left__wrapp"
+                                      key={item.id}
+                                  >
+                                      <span className="problem-avarta">
+                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                      </span>
+                                      <div className="problem-content">
+                                          <h4 className="problem-name">
+                                              {item.user_name}
+                                          </h4>
+                                          <p className="problem-decs">
+                                              <strong>Địa chỉ:</strong>{" "}
+                                              {item.user_address}
+                                          </p>
+                                          <p className="problem-decs">
+                                              <strong>SĐT:</strong>{" "}
+                                              {item.user_phone}
+                                          </p>
+                                          <p className="problem-decs">
+                                              <strong>Sự cố</strong> {item.name}
+                                          </p>
+                                      </div>
+                                  </div>
+                              ))
+                            : helpMe.length > 0 &&
+                              helpMe.slice(0, 7).map((item) => (
+                                  <div
+                                      className="problem-left__wrapp"
+                                      key={item.id}
+                                  >
+                                      <span className="problem-avarta">
+                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                      </span>
+                                      <div className="problem-content">
+                                          <h4 className="problem-name">
+                                              {item.user_name}
+                                          </h4>
+                                          <p className="problem-decs">
+                                              <strong>Địa chỉ:</strong>{" "}
+                                              {item.user_address}
+                                          </p>
+                                          <p className="problem-decs">
+                                              <strong>SĐT:</strong>{" "}
+                                              {item.user_phone}
+                                          </p>
+                                          <p className="problem-decs">
+                                              <strong>sở trường</strong>{" "}
+                                              {item.specialty}
+                                          </p>
+                                      </div>
+                                  </div>
+                              ))}
                     </div>
                 </div>
             </div>
