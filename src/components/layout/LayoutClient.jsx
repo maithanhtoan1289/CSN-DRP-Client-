@@ -592,6 +592,14 @@ const HeaderComponent = ({ children }) => {
                       gap: "20px",
                     }}
                   >
+                    {/* Task 2 */}
+                    <Button
+                      type="default"
+                      className="emergency-button"
+                      onClick={showModal}
+                    >
+                      Cần cứu hộ
+                    </Button>
                     <Dropdown overlay={bellMenu} placement="bottomLeft">
                       <div
                         style={{
