@@ -12,9 +12,8 @@ import Menu from "./Menu";
 
 const HistoryProblemItem = ({
     id,
-    nameUser,
+    name,
     location,
-    type,
     description,
     dataIncident,
 }) => {
@@ -24,9 +23,8 @@ const HistoryProblemItem = ({
 
     const [formUpdate, setFormUpdate] = useState(false);
     const [updateData, setUpdateData] = useState({
-        name: nameUser ? nameUser : "",
+        name: name ? name : "",
         location: location ? location : "",
-        type: type ? type : "",
         status: "chưa giải quyết" ? "chưa giải quyết" : "",
         description: description ? description : "",
     });
@@ -105,12 +103,12 @@ const HistoryProblemItem = ({
                 )}
             </span>
             <div className="problem-content">
-                <h4 className="problem-name">{nameUser}</h4>
+                <h4 className="problem-name">{userInfo.name}</h4>
                 <p className="problem-decs">
                     <strong>Tuyến đường gặp sự cố:</strong> {location}
                 </p>
                 <p className="problem-decs">
-                    <strong>Loại sự cố:</strong> {type}
+                    <strong>Loại sự cố:</strong> {name}
                 </p>
                 <p className="problem-decs">
                     <strong>Mô tả sự cố:</strong> {description}
@@ -144,11 +142,9 @@ const HistoryProblemItem = ({
                                 className="form-title"
                                 htmlFor="form-address"
                             >
-                                Tên
+                                Sự cố
                             </label>
                             <input
-                                disabled
-                                style={{ cursor: "no-drop" }}
                                 type="text"
                                 name="name"
                                 value={updateData.name}
@@ -173,7 +169,7 @@ const HistoryProblemItem = ({
                                 className="form-input"
                             />
                         </div>
-                        <div className="right-form">
+                        {/* <div className="right-form">
                             <label className="form-title" htmlFor="form-type">
                                 Loại sự cố
                             </label>
@@ -185,7 +181,7 @@ const HistoryProblemItem = ({
                                 id="form-type"
                                 className="form-input"
                             />
-                        </div>
+                        </div> */}
                         <div className="right-form">
                             <label className="form-title" htmlFor="form-type">
                                 Trạng thái

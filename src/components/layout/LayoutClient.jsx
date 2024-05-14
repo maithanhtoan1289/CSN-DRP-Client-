@@ -28,6 +28,7 @@ import {
   ThunderboltOutlined,
   ProfileOutlined,
   UploadOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { Grid } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -104,9 +105,8 @@ const HeaderComponent = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-    // Task 3
-    const url = location.pathname;
-
+  // Task 3
+  const url = location.pathname;
 
   // New
   const coordinates = useSelector(
@@ -147,9 +147,8 @@ const HeaderComponent = ({ children }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-    // Task 4
-    const [isModalOpenInfo, setIsModalOpenInfo] = useState(false);
-
+  // Task 4
+  const [isModalOpenInfo, setIsModalOpenInfo] = useState(false);
 
   const {
     token: { borderRadiusLG },
@@ -200,7 +199,13 @@ const HeaderComponent = ({ children }) => {
           Lịch sử cứu hộ
         </Menu.Item>
       )}
-      <Menu.Item key="2" onClick={handleLogout}>
+      <Menu.Item key="2">
+        <Link to="/infomation-user">Hồ sơ cá nhân</Link>
+      </Menu.Item>
+      <Menu.Item key="3">
+        <Link to="/history-incedent">Lịch sử hoạt động</Link>
+      </Menu.Item>
+      <Menu.Item key="4" onClick={handleLogout}>
         Đăng xuất
       </Menu.Item>
     </Menu>
@@ -330,7 +335,7 @@ const HeaderComponent = ({ children }) => {
 
       setLoading(false);
       setIsModalOpen(false);
-      
+
       // Task 4
       // dispatch(getAllRescueNeeded());
       setIsModalOpenInfo(true);
@@ -398,11 +403,6 @@ const HeaderComponent = ({ children }) => {
     }
   };
 
-  // Task 4
-  const handleCancelInfo = () => {
-    setIsModalOpenInfo(false);
-  };
-
   /* Task 6 */
   const handleCheckRole = () => {
     if (userInfo?.role === "ROLE_RESCUER") {
@@ -410,6 +410,11 @@ const HeaderComponent = ({ children }) => {
     } else {
       alert("Bạn cần phải đăng nhập với tư cách là người cứu hộ");
     }
+  };
+
+  // Task 4
+  const handleCancelInfo = () => {
+    setIsModalOpenInfo(false);
   };
 
   return (
@@ -610,10 +615,27 @@ const HeaderComponent = ({ children }) => {
                   </Button>
                 </Link>
 
+                <Link to="/incident">
+                  <Button
+                    style={{
+                      background: `${url === "/incident" ? "red" : "none"}`,
+                      border: `${url === "/incident" ? "red" : "none"}`,
+                    }}
+                  >
+                    <ExclamationCircleOutlined
+                      style={{ fontSize: "20px", color: "white" }}
+                    />
+                    <Text style={{ color: "white", marginLeft: "4px" }}>
+                      Sự cố
+                    </Text>
+                  </Button>
+                </Link>
+
                 {/* Task 6 */}
                 <Button
                   onClick={handleCheckRole}
                   style={{
+                    //Task 3
                     background: `${url === "/rescue-seeker" ? "red" : "none"}`,
                     border: `${url === "/rescue-seeker" ? "red" : "none"}`,
                   }}
@@ -625,15 +647,6 @@ const HeaderComponent = ({ children }) => {
                     Cứu hộ
                   </Text>
                 </Button>
-
-                <Link to="/incident">
-                  <ThunderboltOutlined
-                    style={{ fontSize: "20px", color: "white" }}
-                  />
-                  <Text style={{ color: "white", marginLeft: "4px" }}>
-                    Sự Cố
-                  </Text>
-                </Link>
               </Col>
               <Col
                 span={6}
@@ -661,6 +674,7 @@ const HeaderComponent = ({ children }) => {
                     >
                       Cần cứu hộ
                     </Button>
+
                     <Dropdown overlay={bellMenu} placement="bottomLeft">
                       <div
                         style={{

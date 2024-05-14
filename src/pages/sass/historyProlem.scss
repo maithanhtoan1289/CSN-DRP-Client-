@@ -1,10 +1,10 @@
 .history {
-    padding: 80px 100px 50px;
+    padding: 50px 100px;
     width: 1200px;
     margin: 0 auto;
 
     .wrapp-form {
-        padding: 20px;
+        padding: 40px;
         margin-top: 20px;
         border-radius: 6px;
         background-color: var(--white-color);
@@ -14,11 +14,9 @@
     .history-wrapp {
         
         .history-problem {
-            display: flex;
-            column-gap: 20px;
 
             .history-problem-incident {
-                width: 50%;
+                width: 100%;
             }
 
             .history-problem__heading {
