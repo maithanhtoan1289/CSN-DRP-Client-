@@ -403,6 +403,15 @@ const HeaderComponent = ({ children }) => {
     setIsModalOpenInfo(false);
   };
 
+  /* Task 6 */
+  const handleCheckRole = () => {
+    if (userInfo?.role === "ROLE_RESCUER") {
+      navigate("/rescue-seeker");
+    } else {
+      alert("Bạn cần phải đăng nhập với tư cách là người cứu hộ");
+    }
+  };
+
   return (
     <Layout
       style={{
@@ -601,14 +610,21 @@ const HeaderComponent = ({ children }) => {
                   </Button>
                 </Link>
 
-                <Link to="/rescue-seeker">
+                {/* Task 6 */}
+                <Button
+                  onClick={handleCheckRole}
+                  style={{
+                    background: `${url === "/rescue-seeker" ? "red" : "none"}`,
+                    border: `${url === "/rescue-seeker" ? "red" : "none"}`,
+                  }}
+                >
                   <ThunderboltOutlined
                     style={{ fontSize: "20px", color: "white" }}
                   />
                   <Text style={{ color: "white", marginLeft: "4px" }}>
                     Cứu hộ
                   </Text>
-                </Link>
+                </Button>
 
                 <Link to="/incident">
                   <ThunderboltOutlined
