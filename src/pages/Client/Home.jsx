@@ -396,7 +396,7 @@ const Home = () => {
           margin: "20px 0",
         }}
       >
-        <Breadcrumb.Item>Trang chủ</Breadcrumb.Item>
+        <Breadcrumb.Item></Breadcrumb.Item>
       </Breadcrumb>
       <Row gutter={[16, 16]}>
         <Col

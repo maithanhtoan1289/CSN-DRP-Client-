@@ -104,6 +104,10 @@ const HeaderComponent = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+    // Task 3
+    const url = location.pathname;
+
+
   // New
   const coordinates = useSelector(
     (state) => state?.user?.userInfo?.coordinates
@@ -531,29 +535,58 @@ const HeaderComponent = ({ children }) => {
                   gap: "20px",
                 }}
               >
+                {/* Task 3 */}
                 <Link to="/">
-                  <HomeOutlined style={{ fontSize: "20px", color: "white" }} />
-                  <Text style={{ color: "white", marginLeft: "4px" }}>
-                    Trang chủ
-                  </Text>
+                  <Button
+                    style={{
+                      background: `${url === "/" ? "red" : "none"}`,
+                      border: `${url === "/" ? "red" : "none"}`,
+                    }}
+                  >
+                    <HomeOutlined
+                      style={{ fontSize: "20px", color: "white" }}
+                    />
+                    <Text
+                      style={{
+                        color: "white",
+                        marginLeft: "4px",
+                      }}
+                    >
+                      Trang chủ
+                    </Text>
+                  </Button>
                 </Link>
 
                 <Link to="/news">
-                  <ProfileOutlined
-                    style={{ fontSize: "20px", color: "white" }}
-                  />
-                  <Text style={{ color: "white", marginLeft: "4px" }}>
-                    Tin tức
-                  </Text>
+                  <Button
+                    style={{
+                      background: `${url === "/news" ? "red" : "none"}`,
+                      border: `${url === "/news" ? "red" : "none"}`,
+                    }}
+                  >
+                    <ProfileOutlined
+                      style={{ fontSize: "20px", color: "white" }}
+                    />
+                    <Text style={{ color: "white", marginLeft: "4px" }}>
+                      Tin tức
+                    </Text>
+                  </Button>
                 </Link>
 
                 <Link to="/problem">
-                  <ThunderboltOutlined
-                    style={{ fontSize: "20px", color: "white" }}
-                  />
-                  <Text style={{ color: "white", marginLeft: "4px" }}>
-                    Vấn đề
-                  </Text>
+                  <Button
+                    style={{
+                      background: `${url === "/problem" ? "red" : "none"}`,
+                      border: `${url === "/problem" ? "red" : "none"}`,
+                    }}
+                  >
+                    <ThunderboltOutlined
+                      style={{ fontSize: "20px", color: "white" }}
+                    />
+                    <Text style={{ color: "white", marginLeft: "4px" }}>
+                      Vấn đề
+                    </Text>
+                  </Button>
                 </Link>
 
                 <Link to="/rescue-seeker">
