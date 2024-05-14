@@ -147,6 +147,10 @@ const HeaderComponent = ({ children }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+    // Task 4
+    const [isModalOpenInfo, setIsModalOpenInfo] = useState(false);
+
+
   const {
     token: { borderRadiusLG },
   } = theme.useToken();
@@ -326,7 +330,10 @@ const HeaderComponent = ({ children }) => {
 
       setLoading(false);
       setIsModalOpen(false);
-      dispatch(getAllRescueNeeded());
+      
+      // Task 4
+      // dispatch(getAllRescueNeeded());
+      setIsModalOpenInfo(true);
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -389,6 +396,11 @@ const HeaderComponent = ({ children }) => {
     } else {
       console.error("Trình duyệt không hỗ trợ Geolocation");
     }
+  };
+
+  // Task 4
+  const handleCancelInfo = () => {
+    setIsModalOpenInfo(false);
   };
 
   return (
@@ -931,6 +943,40 @@ const HeaderComponent = ({ children }) => {
             {loading ? "Đang gửi..." : "Gửi thông tin"}
           </Button>
         </Row>
+      </Modal>
+
+      {/* Task 4 */}
+      <Modal
+        title={
+          <div style={{ textAlign: "center" }}>
+            Thông tin đăng nhập người cần cứu hộ
+          </div>
+        }
+        open={isModalOpenInfo}
+        onCancel={handleCancelInfo}
+        centered
+        footer={[]}
+      >
+        <Text strong>
+          Username
+          <p
+            style={{
+              fontWeight: "400",
+            }}
+          >
+            {username}
+          </p>
+        </Text>
+        <Text strong>
+          Password
+          <p
+            style={{
+              fontWeight: "400",
+            }}
+          >
+            {password}
+          </p>
+        </Text>
       </Modal>
 
       <Content
