@@ -19,6 +19,7 @@ import {
   notification,
   Upload,
   message,
+  Radio,
 } from "antd";
 import {
   MenuOutlined,
@@ -223,15 +224,6 @@ const HeaderComponent = ({ children }) => {
   };
   const onSubmit = async (data) => {
     try {
-      // if (!imageUploaded) {
-      //   // Nếu chưa, hiển thị thông báo hoặc thông báo lỗi
-      //   notification.error({
-      //     message: "Lỗi thêm thông tin",
-      //     description: "Vui lòng tải lên hình ảnh gặp nạn!",
-      //   });
-      //   return;
-      // }
-
       setLoading(true);
 
       // Chuyển địa chỉ sang URL
@@ -923,6 +915,28 @@ const HeaderComponent = ({ children }) => {
                   value={valueAddress} // Đặt giá trị của input "address"
                   onChange={(e) => setValueAddress(e.target.value)}
                 />
+              </Form.Item>
+            )}
+          />
+
+          {/* Task 1 */}
+          <Controller
+            name="priority"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <Form.Item
+                label="Độ ưu tiên"
+                validateStatus={error ? "error" : ""}
+                help={error?.message}
+              >
+                <Radio.Group {...field}>
+                  <Radio value="Khẩn cấp" style={{ color: "red" }}>
+                    Khẩn cấp
+                  </Radio>
+                  <Radio value="Trung bình" style={{ color: "green" }}>
+                    Trung bình
+                  </Radio>
+                </Radio.Group>
               </Form.Item>
             )}
           />
