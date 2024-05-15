@@ -238,7 +238,7 @@ const RescueSeeker = () => {
 
   // New
   useEffect(() => {
-    if (userInfo?.role === "ROLE_USER") {
+    if (userInfo?.role === "ROLE_USER" || !userInfo) {
       dispatch(clearUserInfo());
       Cookies.remove("accessToken");
       Cookies.remove("refreshToken");
