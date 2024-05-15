@@ -16,8 +16,9 @@ import {
   notification,
   Menu,
   Avatar,
+  Radio
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, EditOutlined } from "@ant-design/icons";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -26,10 +27,14 @@ import { geocoding, reverseGeocoding } from "../../features/Goong/goongSlice";
 import {
   addNaturalDisasterVersion1,
   addNaturalDisasterVersion2,
+  editNaturalDisasterPriority,
+
 } from "../../features/NaturalDisaster/naturalDisastersSlice";
 import {
   addProblemVersion1,
   addProblemVersion2,
+  editProblemPriority,
+
 } from "../../features/Problems/problemsSlice";
 import { Link, useNavigate } from "react-router-dom";
 import goongjs from "@goongmaps/goong-js";
@@ -103,7 +108,10 @@ const Home = () => {
   });
 
   // Local State
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Task 1
+  const [isModalOpenEditRescueNeeded, setIsModalOpenEditRescueNeeded] =
+    useState(false);
+  const [updatePriority, setUpdatePriority] = useState(false);
   const [emergencyType, setEmergencyType] = useState("");
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -184,132 +192,50 @@ const Home = () => {
   }, [dispatch, userInfo?.role, navigate]);
 
   // Event Handlers
-  const showModal = () => {
-    setIsModalOpen(true);
+  // Task 1
+  const showModalEditRescueNeeded = (item) => {
+    setIsModalOpenEditRescueNeeded(true);
+    setSelectedRescueNeeded(item);
+    if (item.disaster_type) {
+      setEmergencyType("Thiên tai");
+    } else {
+      setEmergencyType("Sự cố");
+    }
+  };
+  const handleCancelEditRescueNeeded = () => {
+    setIsModalOpenEditRescueNeeded(false);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+
 
   const handleChangeType = (value) => {
     setEmergencyType(value);
   };
 
-  const onSubmit = async (data) => {
+  // Task 1
+  const onSubmitEditRescueNeeded = async (data) => {
     try {
-      if (!imageUploaded) {
-        // Nếu chưa, hiển thị thông báo hoặc thông báo lỗi
-        notification.error({
-          message: "Lỗi thêm thông tin",
-          description: "Vui lòng tải lên hình ảnh gặp nạn!",
-        });
-        return;
-      }
-
       setLoading(true);
 
-      // Chuyển địa chỉ sang URL
-      const encodedAddress = encodeURIComponent(data.address || valueAddress);
+      const { naturalDisasterName, priority } = data;
+      const { disaster_id, problem_id } = selectedRescueNeeded || {};
 
-      console.log("encodedAddress", encodedAddress);
-      console.log("valueAddress", valueAddress);
-
-      // Chuyển username sang kiểu viết liền không dấu
-      const username = data.name
-        .toLowerCase()
-        .replace(/\s/g, "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
-      const currentDate = new Date().toLocaleString().replace(/[/:, ]/g, "");
-
-      // Tạo email từ username
-      const email = username + currentDate + "@gmail.com";
-
-      // Tạo data user
-      const newData = {
-        ...data,
-        type: emergencyType,
-        username: username + currentDate,
-        email: email,
-        role: "ROLE_USER",
-        password: "123456",
-        effected_area: data.address || valueAddress,
-      };
-
-      // Delete unnecessary fields based on emergencyType
-      if (newData.type === "Thiên tai") {
-        delete newData.incidentName;
-        delete newData.incidentType;
-      } else if (newData.type === "Sự cố") {
-        delete newData.naturalDisasterName;
-        delete newData.naturalDisasterType;
-      }
-
-      // Get coordinates if not available
-      let coordinates = markerPosition;
-
-      // if (coordinates[0] === 0 && coordinates[1] === 0) {
-      if (isLogin) {
-        const response = await dispatch(geocoding(encodedAddress));
-        console.log("response: " + response);
-        coordinates = JSON.stringify(response.payload.geometry.location);
-
-        const { lng, lat } = response.payload.geometry.location;
-        setMarkerPosition([parseFloat(lng), parseFloat(lat)]);
-        setHasCoordinates(true);
-        setShowDanger(false);
-        setShowMap(true);
-      } else {
-        const response = await dispatch(geocoding(encodedAddress));
-        console.log("response: " + response);
-        coordinates = JSON.stringify(response.payload.geometry.location);
-      }
-
-      // Add coordinates to newData
-      const geometryNewData = {
-        ...newData,
-        coordinates: coordinates,
-        urlImage: urlImage,
-      };
-
-      if (userInfo === null) {
-        // Dispatch action based on emergencyType
-        if (geometryNewData.type === "Thiên tai") {
-          const response = await dispatch(
-            addNaturalDisasterVersion1(geometryNewData)
-          );
-          console.log("Dispatching addNaturalDisaster v1", response);
-        } else if (geometryNewData.type === "Sự cố") {
-          const response = await dispatch(addProblemVersion1(geometryNewData));
-          console.log("Dispatching addProblem v1", response);
-        }
-
-        setSuccessMessage(
-          "Bạn đã gửi thông tin cứu hộ thành công.\nNhân viên cứu hộ sẽ đến trong giây lát, xin bạn hãy kiên nhẫn đợi...\nBên dưới là tài khoản và mật khẩu để bạn đăng nhập và theo dõi vị trí của mình."
+      if (naturalDisasterName !== undefined) {
+        await dispatch(
+          editNaturalDisasterPriority({
+            naturalDisasterId: disaster_id,
+            priority,
+          })
         );
-        setUsername(newData.username);
-        setPassword(newData.password);
       } else {
-        const userInfoData = {
-          ...geometryNewData,
-          id: userInfo.id,
-        };
-
-        delete userInfoData.username;
-        delete userInfoData.password;
-        delete userInfoData.role;
-
-        // Dispatch action based on emergencyType
-        if (geometryNewData.type === "Thiên tai") {
-          await dispatch(addNaturalDisasterVersion2(userInfoData));
-        } else if (geometryNewData.type === "Sự cố") {
-          await dispatch(addProblemVersion2(userInfoData));
-        }
+        await dispatch(
+          editProblemPriority({ problemId: problem_id, priority })
+        );
       }
 
+      await dispatch(getAllRescueNeeded());
       setLoading(false);
-      setIsModalOpen(false);
+      setIsModalOpenEditRescueNeeded(false);
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -389,6 +315,38 @@ const Home = () => {
   console.log("setSelectedRescueNeeded", selectedRescueNeeded);
   console.log("setShowDetailRescueNeeded", showDetailRescueNeeded);
 
+  // Task 1
+  const sortedRescueNeededList = rescueNeededList.slice().sort((a, b) => {
+    // Prioritize "Khẩn cấp"
+    if (
+      a.disaster_priority === "Khẩn cấp" ||
+      a.problem_priority === "Khẩn cấp"
+    ) {
+      return -1;
+    } else if (
+      b.disaster_priority === "Khẩn cấp" ||
+      b.problem_priority === "Khẩn cấp"
+    ) {
+      return 1;
+    }
+
+    // Then prioritize "Trung bình"
+    if (
+      a.disaster_priority === "Trung bình" ||
+      a.problem_priority === "Trung bình"
+    ) {
+      return -1;
+    } else if (
+      b.disaster_priority === "Trung bình" ||
+      b.problem_priority === "Trung bình"
+    ) {
+      return 1;
+    }
+
+    // Finally, items without priority
+    return 0;
+  });
+
   return (
     <>
       <Breadcrumb
@@ -454,22 +412,38 @@ const Home = () => {
                   Danh sách người cần cứu hộ
                 </Typography.Title>
               </Col>
+              {/* Task 1 */}
               <Menu
                 mode="inline"
                 style={{ height: "450px", overflowY: "auto" }}
-                // selectedKeys={selectedItem ? [String(selectedItem)] : []}
-                // disabled={!isFirstMarkerClicked}
               >
-                {rescueNeededList.map((item) => (
+                {sortedRescueNeededList.map((item) => (
                   <Menu.Item
                     key={String(item.id)}
                     onClick={() => handleClick(item)}
                     style={{
                       height: "145px",
                       border: "1px solid rgba(5, 5, 5, 0.06)",
+                      position: "relative",
                     }}
                   >
                     <Row>
+                      {/* Edit button */}
+                      {item?.id === userInfo?.id && (
+                        <Button
+                          type="ghost"
+                          size="small"
+                          icon={<EditOutlined />}
+                          onClick={() => showModalEditRescueNeeded(item)}
+                          style={{
+                            position: "absolute",
+                            top: "6px",
+                            right: "6px",
+                            zIndex: "999",
+                          }}
+                        />
+                      )}
+
                       <Col span={4}>
                         <Avatar src={item.avatar} size={40} />
                       </Col>
@@ -503,12 +477,324 @@ const Home = () => {
                           Trạng thái:{" "}
                           {item.disaster_status || item.problem_status}
                         </Text>
+
+                        {/* Task 1 */}
+                        <Text
+                          type="secondary"
+                          style={{
+                            display: "block",
+                            fontSize: "13px",
+                          }}
+                        >
+                          Độ ưu tiên:{" "}
+                          <Text
+                            style={{
+                              fontWeight: "600",
+                              color:
+                                item.disaster_priority === "Khẩn cấp" ||
+                                item.problem_priority === "Khẩn cấp"
+                                  ? "red"
+                                  : item.disaster_priority === "Trung bình" ||
+                                    item.problem_priority === "Trung bình"
+                                  ? "green"
+                                  : "inherit",
+                            }}
+                          >
+                            {item.disaster_priority || item.problem_priority}
+                          </Text>
+                        </Text>
                       </Col>
                     </Row>
                   </Menu.Item>
                 ))}
               </Menu>
             </Col>
+
+            {/* Task 1 */}
+            <Modal
+              title={
+                <div style={{ textAlign: "center" }}>
+                  Thông tin người cần cứu hộ
+                </div>
+              }
+              open={isModalOpenEditRescueNeeded}
+              onCancel={handleCancelEditRescueNeeded}
+              centered
+              closeIcon={null}
+              footer={[]}
+            >
+              <Form
+                labelCol={{
+                  span: 6,
+                }}
+                wrapperCol={{
+                  span: 18,
+                }}
+                layout="horizontal"
+                style={{
+                  marginTop: "25px",
+                }}
+              >
+                <Controller
+                  name="name"
+                  control={control}
+                  defaultValue={selectedRescueNeeded?.name || ""}
+                  render={({ field }) => (
+                    <Form.Item
+                      label="Họ và tên"
+                      validateStatus={errors.name ? "error" : ""}
+                      help={errors.name ? errors.name.message : ""}
+                    >
+                      <Input {...field} readOnly placeholder="Nhập họ và tên" />
+                    </Form.Item>
+                  )}
+                />
+
+                <Controller
+                  name="phone"
+                  control={control}
+                  defaultValue={selectedRescueNeeded?.phone || ""}
+                  render={({ field }) => (
+                    <Form.Item
+                      label="Số điện thoại"
+                      validateStatus={errors.phone ? "error" : ""}
+                      help={errors.phone ? errors.phone.message : ""}
+                    >
+                      <Input
+                        {...field}
+                        readOnly
+                        placeholder="Nhập số điện thoại"
+                      />
+                    </Form.Item>
+                  )}
+                />
+
+                <Controller
+                  name="type"
+                  control={control}
+                  render={({ field }) => (
+                    <Form.Item
+                      label="Kiểu gặp nạn"
+                      validateStatus={errors.type ? "error" : ""}
+                      help={errors.type ? errors.type.message : ""}
+                    >
+                      <Select
+                        placeholder="Vui lòng chọn kiểu gặp nạn"
+                        defaultValue={emergencyType}
+                        onChange={handleChangeType}
+                        disabled
+                      >
+                        <Option value="Thiên tai">Thiên tai</Option>
+                        <Option value="Sự cố">Sự cố</Option>
+                      </Select>
+                    </Form.Item>
+                  )}
+                />
+
+                {emergencyType === "Thiên tai" && (
+                  <>
+                    <Controller
+                      name="naturalDisasterName"
+                      control={control}
+                      defaultValue={selectedRescueNeeded?.disaster_name || ""}
+                      render={({ field }) => (
+                        <Form.Item
+                          label="Tên thiên tai"
+                          validateStatus={
+                            errors.naturalDisasterName ? "error" : ""
+                          }
+                          help={
+                            errors.naturalDisasterName
+                              ? errors.naturalDisasterName.message
+                              : ""
+                          }
+                        >
+                          <Input
+                            {...field}
+                            readOnly
+                            placeholder="Nhập tên thiên tai"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+
+                    <Controller
+                      name="naturalDisasterType"
+                      control={control}
+                      defaultValue={selectedRescueNeeded?.disaster_type || ""}
+                      render={({ field }) => (
+                        <Form.Item
+                          label="Loại thiên tai"
+                          validateStatus={
+                            errors.naturalDisasterType ? "error" : ""
+                          }
+                          help={
+                            errors.naturalDisasterType
+                              ? errors.naturalDisasterType.message
+                              : ""
+                          }
+                        >
+                          <Input
+                            {...field}
+                            readOnly
+                            placeholder="Nhập loại thiên tai"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+                  </>
+                )}
+
+                {emergencyType === "Sự cố" && (
+                  <>
+                    <Controller
+                      name="incidentName"
+                      control={control}
+                      defaultValue={selectedRescueNeeded?.problem_name || ""}
+                      render={({ field }) => (
+                        <Form.Item
+                          label="Tên sự cố"
+                          validateStatus={errors.incidentName ? "error" : ""}
+                          help={
+                            errors.incidentName
+                              ? errors.incidentName.message
+                              : ""
+                          }
+                        >
+                          <Input
+                            {...field}
+                            readOnly
+                            placeholder="Nhập tên sự cố"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+
+                    <Controller
+                      name="incidentType"
+                      control={control}
+                      defaultValue={selectedRescueNeeded?.problem_type || ""}
+                      render={({ field }) => (
+                        <Form.Item
+                          label="Loại sự cố"
+                          validateStatus={errors.incidentType ? "error" : ""}
+                          help={
+                            errors.incidentType
+                              ? errors.incidentType.message
+                              : ""
+                          }
+                        >
+                          <Input
+                            {...field}
+                            readOnly
+                            placeholder="Nhập loại sự cố"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+                  </>
+                )}
+
+                <Controller
+                  name="address"
+                  control={control}
+                  defaultValue={selectedRescueNeeded?.address || ""}
+                  render={({ field }) => (
+                    <Form.Item
+                      label="Địa chỉ"
+                      validateStatus={errors.address ? "error" : ""}
+                      help={errors.address ? errors.address.message : ""}
+                    >
+                      <Input
+                        {...field}
+                        readOnly
+                        placeholder="Nhập địa chỉ"
+                        // value={valueAddress} // Đặt giá trị của input "address"
+                        onChange={(e) => setValueAddress(e.target.value)}
+                      />
+                    </Form.Item>
+                  )}
+                />
+
+                {/* Task 1 */}
+                <Controller
+                  name="priority"
+                  control={control}
+                  defaultValue={
+                    selectedRescueNeeded?.disaster_priority ||
+                    selectedRescueNeeded?.problem_priority
+                  }
+                  render={({ field, fieldState: { error } }) => (
+                    <>
+                      <Form.Item
+                        label="Độ ưu tiên"
+                        validateStatus={error ? "error" : ""}
+                        help={error?.message}
+                      >
+                        <Radio.Group {...field}>
+                          <Radio value="Khẩn cấp" style={{ color: "red" }}>
+                            Khẩn cấp
+                          </Radio>
+                          <Radio value="Trung bình" style={{ color: "green" }}>
+                            Trung bình
+                          </Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                    </>
+                  )}
+                />
+              </Form>
+
+              <Row
+                style={{
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  marginBottom: "15px",
+                }}
+              >
+                <Button disabled onClick={getCurrentPosition}>
+                  Vị trí hiện tại
+                </Button>
+              </Row>
+
+              <Row
+                style={{
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  marginBottom: "15px",
+                }}
+              >
+                <Upload
+                  beforeUpload={beforeUpload}
+                  customRequest={handleUpload}
+                  accept="image/*"
+                >
+                  <Button disabled icon={<UploadOutlined />}>
+                    Thêm hình ảnh
+                  </Button>
+                </Upload>
+              </Row>
+
+              <Row
+                style={{
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <Button onClick={handleCancelEditRescueNeeded}>Trở về</Button>
+                <Button
+                  type="primary"
+                  onClick={handleSubmit(onSubmitEditRescueNeeded)}
+                  loading={loading}
+                >
+                  {loading ? "Đang gửi..." : "Cập nhật"}
+                </Button>
+              </Row>
+            </Modal>
 
             <Col
               xs={24}

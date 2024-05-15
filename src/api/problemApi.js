@@ -40,6 +40,17 @@ const problemApi = {
       throw error;
     }
   },
+
+  // Task 1
+  editProblemPriority: async (data) => {
+    const url = "/problems/edit-priority";
+    try {
+      const response = await axiosClient.put(url, data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default problemApi;

@@ -40,6 +40,17 @@ const naturalDisasterApi = {
       throw error;
     }
   },
+
+  // Task 1
+  editNaturalDisasterPriority: async (data) => {
+    const url = "/natural-disasters/edit-priority";
+    try {
+      const response = await axiosClient.put(url, data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default naturalDisasterApi;

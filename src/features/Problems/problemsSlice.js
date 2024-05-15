@@ -62,6 +62,19 @@ export const addProblemStatus = createAsyncThunk(
   }
 );
 
+// Task 1
+export const editProblemPriority = createAsyncThunk(
+  "naturalDisaster/editProblemPriority",
+  async (data) => {
+    try {
+      const response = await problemApi.editProblemPriority(data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 const problemSlice = createSlice({
   name: "problem",
   initialState,
@@ -132,6 +145,21 @@ const problemSlice = createSlice({
         state.error = null;
       })
       .addCase(addProblemStatus.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+
+      // Task 1
+      // Edit Problem Priority
+      .addCase(editProblemPriority.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(editProblemPriority.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(editProblemPriority.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       });
