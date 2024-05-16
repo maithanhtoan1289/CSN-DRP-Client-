@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button,
-  Modal,
-  Form,
-  Input,
-  Row,
-  Col,
-  theme,
-  Breadcrumb,
-  Typography,
-  Image,
-  Select,
-  message,
-  Upload,
-  notification,
-  Menu,
-  Avatar,
-  Radio
+    Button,
+    Modal,
+    Form,
+    Input,
+    Row,
+    Col,
+    theme,
+    Breadcrumb,
+    Typography,
+    Image,
+    Select,
+    message,
+    Upload,
+    notification,
+    Menu,
+    Avatar,
+    Radio,
 } from "antd";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+
 import { UploadOutlined, EditOutlined } from "@ant-design/icons";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
@@ -25,16 +27,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { geocoding, reverseGeocoding } from "../../features/Goong/goongSlice";
 import {
-  addNaturalDisasterVersion1,
-  addNaturalDisasterVersion2,
-  editNaturalDisasterPriority,
-
+    addNaturalDisasterVersion1,
+    addNaturalDisasterVersion2,
+    editNaturalDisasterPriority,
 } from "../../features/NaturalDisaster/naturalDisastersSlice";
 import {
-  addProblemVersion1,
-  addProblemVersion2,
-  editProblemPriority,
-
+    addProblemVersion1,
+    addProblemVersion2,
+    editProblemPriority,
 } from "../../features/Problems/problemsSlice";
 import { Link, useNavigate } from "react-router-dom";
 import goongjs from "@goongmaps/goong-js";
@@ -42,9 +42,9 @@ import { GOONG_MAP_KEY } from "../../constants/constants";
 import { addImage } from "../../features/Uploads/uploadsSlice";
 import axios from "axios";
 import {
-  clearUserInfo,
-  getAllRescueNeeded,
-  getAllRescueSeeker,
+    clearUserInfo,
+    getAllRescueNeeded,
+    getAllRescueSeeker,
 } from "../../features/Users/usersSlice";
 import Cookies from "js-cookie";
 
@@ -53,85 +53,85 @@ const { Text } = Typography;
 
 // Define yup validate
 const schema = yup.object().shape({
-  name: yup
-    .string()
-    .required("Vui lòng nhập họ và tên")
-    .min(5, "Họ và tên phải có ít nhất 5 ký tự")
-    .max(30, "Họ và tên chỉ được nhập tối đa 30 ký tự"),
-  phone: yup
-    .string()
-    .required("Vui lòng nhập số điện thoại")
-    .min(10, "Số điện thoại chỉ được nhập tối thiểu 10 ký tự")
-    .max(10, "Số điện thoại chỉ được nhập tối đa 10 ký tự"),
-  // address: yup
-  //   .string()
-  //   .required("Vui lòng nhập địa chỉ")
-  //   .min(5, "Địa chỉ phải có ít nhất 10 ký tự")
-  //   .max(100, "Địa chỉ chỉ được nhập tối đa 100 ký tự"),
+    name: yup
+        .string()
+        .required("Vui lòng nhập họ và tên")
+        .min(5, "Họ và tên phải có ít nhất 5 ký tự")
+        .max(30, "Họ và tên chỉ được nhập tối đa 30 ký tự"),
+    phone: yup
+        .string()
+        .required("Vui lòng nhập số điện thoại")
+        .min(10, "Số điện thoại chỉ được nhập tối thiểu 10 ký tự")
+        .max(10, "Số điện thoại chỉ được nhập tối đa 10 ký tự"),
+    // address: yup
+    //   .string()
+    //   .required("Vui lòng nhập địa chỉ")
+    //   .min(5, "Địa chỉ phải có ít nhất 10 ký tự")
+    //   .max(100, "Địa chỉ chỉ được nhập tối đa 100 ký tự"),
 });
 
 const Home = () => {
-  // Redux State
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const userInfo = useSelector((state) => state?.user?.userInfo);
-  const coordinates = useSelector(
-    (state) => state?.user?.userInfo?.coordinates
-  );
+    // Redux State
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const userInfo = useSelector((state) => state?.user?.userInfo);
+    const coordinates = useSelector(
+        (state) => state?.user?.userInfo?.coordinates
+    );
 
-  // New
-  const rescueNeededList = useSelector((state) => state?.user?.list);
-  const rescueSeekerList = useSelector((state) => state?.user?.listSeeker);
+    // New
+    const rescueNeededList = useSelector((state) => state?.user?.list);
+    const rescueSeekerList = useSelector((state) => state?.user?.listSeeker);
 
-  // Constants
-  let validLat = 0;
-  let validLng = 0;
+    // Constants
+    let validLat = 0;
+    let validLng = 0;
 
-  if (coordinates) {
-    const coordinatesParse = JSON.parse(coordinates);
-    validLat = parseFloat(coordinatesParse?.lat);
-    validLng = parseFloat(coordinatesParse?.lng);
-  }
+    if (coordinates) {
+        const coordinatesParse = JSON.parse(coordinates);
+        validLat = parseFloat(coordinatesParse?.lat);
+        validLng = parseFloat(coordinatesParse?.lng);
+    }
 
-  // Ant design
-  const {
-    token: { borderRadiusLG },
-  } = theme.useToken();
+    // Ant design
+    const {
+        token: { borderRadiusLG },
+    } = theme.useToken();
 
-  // Hook form
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
+    // Hook form
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        resolver: yupResolver(schema),
+    });
 
-  // Local State
-  // Task 1
-  const [isModalOpenEditRescueNeeded, setIsModalOpenEditRescueNeeded] =
-    useState(false);
-  const [updatePriority, setUpdatePriority] = useState(false);
-  const [emergencyType, setEmergencyType] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [markerPosition, setMarkerPosition] = useState([validLng, validLat]);
-  const [hasCoordinates, setHasCoordinates] = useState(!!coordinates);
-  const [isLogin] = useState(!!userInfo);
-  const [showMap, setShowMap] = useState(hasCoordinates);
-  const [showDanger, setShowDanger] = useState(true);
-  const [urlImage, setUrlImage] = useState("");
-  const [valueAddress, setValueAddress] = useState("");
-  const [imageUploaded, setImageUploaded] = useState(false);
+    // Local State
+    // Task 1
+    const [isModalOpenEditRescueNeeded, setIsModalOpenEditRescueNeeded] =
+        useState(false);
+    const [updatePriority, setUpdatePriority] = useState(false);
+    const [emergencyType, setEmergencyType] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [markerPosition, setMarkerPosition] = useState([validLng, validLat]);
+    const [hasCoordinates, setHasCoordinates] = useState(!!coordinates);
+    const [isLogin] = useState(!!userInfo);
+    const [showMap, setShowMap] = useState(hasCoordinates);
+    const [showDanger, setShowDanger] = useState(true);
+    const [urlImage, setUrlImage] = useState("");
+    const [valueAddress, setValueAddress] = useState("");
+    const [imageUploaded, setImageUploaded] = useState(false);
 
-  // New
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [isFirstMarkerClicked, setIsFirstMarkerClicked] = useState(false);
-  const [selectedRescueNeeded, setSelectedRescueNeeded] = useState(null);
-  const [popupIndex, setPopupIndex] = useState(null);
-  const [showDetailRescueNeeded, setShowDetailRescueNeeded] = useState(false);
+    // New
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [isFirstMarkerClicked, setIsFirstMarkerClicked] = useState(false);
+    const [selectedRescueNeeded, setSelectedRescueNeeded] = useState(null);
+    const [popupIndex, setPopupIndex] = useState(null);
+    const [showDetailRescueNeeded, setShowDetailRescueNeeded] = useState(false);
 
   // useEffect add map
   useEffect(() => {
@@ -304,610 +304,792 @@ const Home = () => {
     }
   };
 
-  // New
-  const handleClick = async (item, index) => {
-    setSelectedItem(item.id);
-    setSelectedRescueNeeded(item);
-    const { lat, lng } = JSON.parse(item.coordinates);
-    setMarkerPosition([lng, lat]);
-  };
+    // New
+    const handleClick = async (item, index) => {
+        setSelectedItem(item.id);
+        setSelectedRescueNeeded(item);
+        const { lat, lng } = JSON.parse(item.coordinates);
+        setMarkerPosition([lng, lat]);
+    };
 
-  console.log("setSelectedItem", selectedItem);
-  console.log("setSelectedRescueNeeded", selectedRescueNeeded);
-  console.log("setShowDetailRescueNeeded", showDetailRescueNeeded);
 
-  // Task 1
-  const sortedRescueNeededList = rescueNeededList.slice().sort((a, b) => {
-    // Prioritize "Khẩn cấp"
-    if (
-      a.disaster_priority === "Khẩn cấp" ||
-      a.problem_priority === "Khẩn cấp"
-    ) {
-      return -1;
-    } else if (
-      b.disaster_priority === "Khẩn cấp" ||
-      b.problem_priority === "Khẩn cấp"
-    ) {
-      return 1;
-    }
+    // Task 1
+    const sortedRescueNeededList = rescueNeededList.slice().sort((a, b) => {
+        // Prioritize "Khẩn cấp"
+        if (
+            a.disaster_priority === "Khẩn cấp" ||
+            a.problem_priority === "Khẩn cấp"
+        ) {
+            return -1;
+        } else if (
+            b.disaster_priority === "Khẩn cấp" ||
+            b.problem_priority === "Khẩn cấp"
+        ) {
+            return 1;
+        }
 
-    // Then prioritize "Trung bình"
-    if (
-      a.disaster_priority === "Trung bình" ||
-      a.problem_priority === "Trung bình"
-    ) {
-      return -1;
-    } else if (
-      b.disaster_priority === "Trung bình" ||
-      b.problem_priority === "Trung bình"
-    ) {
-      return 1;
-    }
+        // Then prioritize "Trung bình"
+        if (
+            a.disaster_priority === "Trung bình" ||
+            a.problem_priority === "Trung bình"
+        ) {
+            return -1;
+        } else if (
+            b.disaster_priority === "Trung bình" ||
+            b.problem_priority === "Trung bình"
+        ) {
+            return 1;
+        }
 
-    // Finally, items without priority
-    return 0;
-  });
+        // Finally, items without priority
+        return 0;
+    });
 
-  return (
-    <>
-      <Breadcrumb
-        style={{
-          margin: "20px 0",
-        }}
-      >
-        <Breadcrumb.Item></Breadcrumb.Item>
-      </Breadcrumb>
-      <Row gutter={[16, 16]}>
-        <Col
-          xs={24}
-          sm={24}
-          md={24}
-          lg={24}
-          xl={24}
-          style={{
-            height: "100%",
-            background: borderRadiusLG,
-          }}
-        >
-          <Row
-            gutter={[16, 16]}
-            style={{
-              height: "auto",
-              background: borderRadiusLG,
-            }}
-          >
-            {/* New */}
-            <Col
-              xs={24}
-              sm={24}
-              md={24}
-              lg={6}
-              xl={6}
-              style={{
-                height: "500px",
-                background: "white",
-                color: "black",
-                border: "1px solid rgba(248, 11, 11, 0.06)",
-                borderRadius: "10px",
-              }}
-            >
-              <Col
+
+    return (
+        <>
+            <Breadcrumb
                 style={{
-                  height: "50px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderBottom: "1px solid rgba(5, 5, 5, 0.06)",
+                    margin: "20px 0",
                 }}
-              >
-                <Typography.Title
-                  level={1}
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "700",
-                    color: "black",
-                    marginLeft: "10px",
-                    marginBottom: 0,
-                  }}
-                >
-                  Danh sách người cần cứu hộ
-                </Typography.Title>
-              </Col>
-              {/* Task 1 */}
-              <Menu
-                mode="inline"
-                style={{ height: "450px", overflowY: "auto" }}
-              >
-                {sortedRescueNeededList.map((item) => (
-                  <Menu.Item
-                    key={String(item.id)}
-                    onClick={() => handleClick(item)}
+            >
+                <Breadcrumb.Item></Breadcrumb.Item>
+            </Breadcrumb>
+            <Row gutter={[16, 16]}>
+                <Col
+                    xs={24}
+                    sm={24}
+                    md={24}
+                    lg={24}
+                    xl={24}
                     style={{
-                      height: "145px",
-                      border: "1px solid rgba(5, 5, 5, 0.06)",
-                      position: "relative",
+                        height: "100%",
+                        background: borderRadiusLG,
                     }}
-                  >
-                    <Row>
-                      {/* Edit button */}
-                      {item?.id === userInfo?.id && (
-                        <Button
-                          type="ghost"
-                          size="small"
-                          icon={<EditOutlined />}
-                          onClick={() => showModalEditRescueNeeded(item)}
-                          style={{
-                            position: "absolute",
-                            top: "6px",
-                            right: "6px",
-                            zIndex: "999",
-                          }}
-                        />
-                      )}
+                >
+                    <Row
+                        gutter={[16, 16]}
+                        style={{
+                            height: "auto",
+                            background: borderRadiusLG,
+                        }}
+                    >
+                        {/* New */}
+                        <Col
+                            xs={24}
+                            sm={24}
+                            md={24}
+                            lg={6}
+                            xl={6}
+                            style={{
+                                height: "500px",
+                                background: "white",
+                                color: "black",
+                                border: "1px solid rgba(248, 11, 11, 0.06)",
+                                borderRadius: "10px",
+                            }}
+                        >
+                            <Col
+                                style={{
+                                    height: "50px",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    borderBottom:
+                                        "1px solid rgba(5, 5, 5, 0.06)",
+                                }}
+                            >
+                                <Typography.Title
+                                    level={1}
+                                    style={{
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        color: "black",
+                                        marginLeft: "10px",
+                                        marginBottom: 0,
+                                    }}
+                                >
+                                    Danh sách người cần cứu hộ
+                                </Typography.Title>
+                            </Col>
+                            {/* Task 1 */}
+                            <Menu
+                                mode="inline"
+                                style={{ height: "450px", overflowY: "auto" }}
+                            >
+                                {sortedRescueNeededList.map((item) => (
+                                    <Menu.Item
+                                        key={String(item.id)}
+                                        onClick={() => handleClick(item)}
+                                        style={{
+                                            height: "145px",
+                                            border: "1px solid rgba(5, 5, 5, 0.06)",
+                                            position: "relative",
+                                        }}
+                                    >
+                                        <Row>
+                                            {/* Edit button */}
+                                            {item?.id === userInfo?.id && (
+                                                <Button
+                                                    type="ghost"
+                                                    size="small"
+                                                    icon={<EditOutlined />}
+                                                    onClick={() =>
+                                                        showModalEditRescueNeeded(
+                                                            item
+                                                        )
+                                                    }
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: "6px",
+                                                        right: "6px",
+                                                        zIndex: "999",
+                                                    }}
+                                                />
+                                            )}
 
-                      <Col span={4}>
-                        <Avatar src={item.avatar} size={40} />
-                      </Col>
-                      <Col span={20}>
-                        <Text style={{ display: "block", marginBottom: "5px" }}>
-                          {item.name}
-                        </Text>
-                        <Text
-                          type="secondary"
-                          style={{ display: "block", fontSize: "13px" }}
-                        >
-                          Số điện thoại: {item.phone}
-                        </Text>
-                        <Text
-                          type="secondary"
-                          style={{ display: "block", fontSize: "13px" }}
-                        >
-                          Kiểu gặp nạn:{" "}
-                          {item.disaster_name || item.problem_name}
-                        </Text>
-                        <Text
-                          type="secondary"
-                          style={{ display: "block", fontSize: "13px" }}
-                        >
-                          Địa chỉ: {item.address}
-                        </Text>
-                        <Text
-                          type="secondary"
-                          style={{ display: "block", fontSize: "13px" }}
-                        >
-                          Trạng thái:{" "}
-                          {item.disaster_status || item.problem_status}
-                        </Text>
+                                            <Col span={4}>
+                                                <Avatar
+                                                    src={item.avatar}
+                                                    size={40}
+                                                />
+                                            </Col>
+                                            <Col span={20}>
+                                                <Text
+                                                    style={{
+                                                        display: "block",
+                                                        marginBottom: "5px",
+                                                    }}
+                                                >
+                                                    {item.name}
+                                                </Text>
+                                                <Text
+                                                    type="secondary"
+                                                    style={{
+                                                        display: "block",
+                                                        fontSize: "13px",
+                                                    }}
+                                                >
+                                                    Số điện thoại: {item.phone}
+                                                </Text>
+                                                <Text
+                                                    type="secondary"
+                                                    style={{
+                                                        display: "block",
+                                                        fontSize: "13px",
+                                                    }}
+                                                >
+                                                    Kiểu gặp nạn:{" "}
+                                                    {item.disaster_name ||
+                                                        item.problem_name}
+                                                </Text>
+                                                <Text
+                                                    type="secondary"
+                                                    style={{
+                                                        display: "block",
+                                                        fontSize: "13px",
+                                                    }}
+                                                >
+                                                    Địa chỉ: {item.address}
+                                                </Text>
+                                                <Text
+                                                    type="secondary"
+                                                    style={{
+                                                        display: "block",
+                                                        fontSize: "13px",
+                                                    }}
+                                                >
+                                                    Trạng thái:{" "}
+                                                    {item.disaster_status ||
+                                                        item.problem_status}
+                                                </Text>
+
+                                                {/* Task 1 */}
+                                                <Text
+                                                    type="secondary"
+                                                    style={{
+                                                        display: "block",
+                                                        fontSize: "13px",
+                                                    }}
+                                                >
+                                                    Độ ưu tiên:{" "}
+                                                    <Text
+                                                        style={{
+                                                            fontWeight: "600",
+                                                            color:
+                                                                item.disaster_priority ===
+                                                                    "Khẩn cấp" ||
+                                                                item.problem_priority ===
+                                                                    "Khẩn cấp"
+                                                                    ? "red"
+                                                                    : item.disaster_priority ===
+                                                                          "Trung bình" ||
+                                                                      item.problem_priority ===
+                                                                          "Trung bình"
+                                                                    ? "green"
+                                                                    : "inherit",
+                                                        }}
+                                                    >
+                                                        {item.disaster_priority ||
+                                                            item.problem_priority}
+                                                    </Text>
+                                                </Text>
+                                            </Col>
+                                        </Row>
+                                    </Menu.Item>
+                                ))}
+                            </Menu>
+                        </Col>
 
                         {/* Task 1 */}
-                        <Text
-                          type="secondary"
-                          style={{
-                            display: "block",
-                            fontSize: "13px",
-                          }}
+                        <Modal
+                            title={
+                                <div style={{ textAlign: "center" }}>
+                                    Thông tin người cần cứu hộ
+                                </div>
+                            }
+                            open={isModalOpenEditRescueNeeded}
+                            onCancel={handleCancelEditRescueNeeded}
+                            centered
+                            closeIcon={null}
+                            footer={[]}
                         >
-                          Độ ưu tiên:{" "}
-                          <Text
+                            <Form
+                                labelCol={{
+                                    span: 6,
+                                }}
+                                wrapperCol={{
+                                    span: 18,
+                                }}
+                                layout="horizontal"
+                                style={{
+                                    marginTop: "25px",
+                                }}
+                            >
+                                <Controller
+                                    name="name"
+                                    control={control}
+                                    defaultValue={
+                                        selectedRescueNeeded?.name || ""
+                                    }
+                                    render={({ field }) => (
+                                        <Form.Item
+                                            label="Họ và tên"
+                                            validateStatus={
+                                                errors.name ? "error" : ""
+                                            }
+                                            help={
+                                                errors.name
+                                                    ? errors.name.message
+                                                    : ""
+                                            }
+                                        >
+                                            <Input
+                                                {...field}
+                                                readOnly
+                                                placeholder="Nhập họ và tên"
+                                            />
+                                        </Form.Item>
+                                    )}
+                                />
+
+                                <Controller
+                                    name="phone"
+                                    control={control}
+                                    defaultValue={
+                                        selectedRescueNeeded?.phone || ""
+                                    }
+                                    render={({ field }) => (
+                                        <Form.Item
+                                            label="Số điện thoại"
+                                            validateStatus={
+                                                errors.phone ? "error" : ""
+                                            }
+                                            help={
+                                                errors.phone
+                                                    ? errors.phone.message
+                                                    : ""
+                                            }
+                                        >
+                                            <Input
+                                                {...field}
+                                                readOnly
+                                                placeholder="Nhập số điện thoại"
+                                            />
+                                        </Form.Item>
+                                    )}
+                                />
+
+                                <Controller
+                                    name="type"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Form.Item
+                                            label="Kiểu gặp nạn"
+                                            validateStatus={
+                                                errors.type ? "error" : ""
+                                            }
+                                            help={
+                                                errors.type
+                                                    ? errors.type.message
+                                                    : ""
+                                            }
+                                        >
+                                            <Select
+                                                placeholder="Vui lòng chọn kiểu gặp nạn"
+                                                defaultValue={emergencyType}
+                                                onChange={handleChangeType}
+                                                disabled
+                                            >
+                                                <Option value="Thiên tai">
+                                                    Thiên tai
+                                                </Option>
+                                                <Option value="Sự cố">
+                                                    Sự cố
+                                                </Option>
+                                            </Select>
+                                        </Form.Item>
+                                    )}
+                                />
+
+                                {emergencyType === "Thiên tai" && (
+                                    <>
+                                        <Controller
+                                            name="naturalDisasterName"
+                                            control={control}
+                                            defaultValue={
+                                                selectedRescueNeeded?.disaster_name ||
+                                                ""
+                                            }
+                                            render={({ field }) => (
+                                                <Form.Item
+                                                    label="Tên thiên tai"
+                                                    validateStatus={
+                                                        errors.naturalDisasterName
+                                                            ? "error"
+                                                            : ""
+                                                    }
+                                                    help={
+                                                        errors.naturalDisasterName
+                                                            ? errors
+                                                                  .naturalDisasterName
+                                                                  .message
+                                                            : ""
+                                                    }
+                                                >
+                                                    <Input
+                                                        {...field}
+                                                        readOnly
+                                                        placeholder="Nhập tên thiên tai"
+                                                    />
+                                                </Form.Item>
+                                            )}
+                                        />
+
+                                        <Controller
+                                            name="naturalDisasterType"
+                                            control={control}
+                                            defaultValue={
+                                                selectedRescueNeeded?.disaster_type ||
+                                                ""
+                                            }
+                                            render={({ field }) => (
+                                                <Form.Item
+                                                    label="Loại thiên tai"
+                                                    validateStatus={
+                                                        errors.naturalDisasterType
+                                                            ? "error"
+                                                            : ""
+                                                    }
+                                                    help={
+                                                        errors.naturalDisasterType
+                                                            ? errors
+                                                                  .naturalDisasterType
+                                                                  .message
+                                                            : ""
+                                                    }
+                                                >
+                                                    <Input
+                                                        {...field}
+                                                        readOnly
+                                                        placeholder="Nhập loại thiên tai"
+                                                    />
+                                                </Form.Item>
+                                            )}
+                                        />
+                                    </>
+                                )}
+
+                                {emergencyType === "Sự cố" && (
+                                    <>
+                                        <Controller
+                                            name="incidentName"
+                                            control={control}
+                                            defaultValue={
+                                                selectedRescueNeeded?.problem_name ||
+                                                ""
+                                            }
+                                            render={({ field }) => (
+                                                <Form.Item
+                                                    label="Tên sự cố"
+                                                    validateStatus={
+                                                        errors.incidentName
+                                                            ? "error"
+                                                            : ""
+                                                    }
+                                                    help={
+                                                        errors.incidentName
+                                                            ? errors
+                                                                  .incidentName
+                                                                  .message
+                                                            : ""
+                                                    }
+                                                >
+                                                    <Input
+                                                        {...field}
+                                                        readOnly
+                                                        placeholder="Nhập tên sự cố"
+                                                    />
+                                                </Form.Item>
+                                            )}
+                                        />
+
+                                        <Controller
+                                            name="incidentType"
+                                            control={control}
+                                            defaultValue={
+                                                selectedRescueNeeded?.problem_type ||
+                                                ""
+                                            }
+                                            render={({ field }) => (
+                                                <Form.Item
+                                                    label="Loại sự cố"
+                                                    validateStatus={
+                                                        errors.incidentType
+                                                            ? "error"
+                                                            : ""
+                                                    }
+                                                    help={
+                                                        errors.incidentType
+                                                            ? errors
+                                                                  .incidentType
+                                                                  .message
+                                                            : ""
+                                                    }
+                                                >
+                                                    <Input
+                                                        {...field}
+                                                        readOnly
+                                                        placeholder="Nhập loại sự cố"
+                                                    />
+                                                </Form.Item>
+                                            )}
+                                        />
+                                    </>
+                                )}
+
+                                <Controller
+                                    name="address"
+                                    control={control}
+                                    defaultValue={
+                                        selectedRescueNeeded?.address || ""
+                                    }
+                                    render={({ field }) => (
+                                        <Form.Item
+                                            label="Địa chỉ"
+                                            validateStatus={
+                                                errors.address ? "error" : ""
+                                            }
+                                            help={
+                                                errors.address
+                                                    ? errors.address.message
+                                                    : ""
+                                            }
+                                        >
+                                            <Input
+                                                {...field}
+                                                readOnly
+                                                placeholder="Nhập địa chỉ"
+                                                // value={valueAddress} // Đặt giá trị của input "address"
+                                                onChange={(e) =>
+                                                    setValueAddress(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            />
+                                        </Form.Item>
+                                    )}
+                                />
+
+                                {/* Task 1 */}
+                                <Controller
+                                    name="priority"
+                                    control={control}
+                                    defaultValue={
+                                        selectedRescueNeeded?.disaster_priority ||
+                                        selectedRescueNeeded?.problem_priority
+                                    }
+                                    render={({
+                                        field,
+                                        fieldState: { error },
+                                    }) => (
+                                        <>
+                                            <Form.Item
+                                                label="Độ ưu tiên"
+                                                validateStatus={
+                                                    error ? "error" : ""
+                                                }
+                                                help={error?.message}
+                                            >
+                                                <Radio.Group {...field}>
+                                                    <Radio
+                                                        value="Khẩn cấp"
+                                                        style={{ color: "red" }}
+                                                    >
+                                                        Khẩn cấp
+                                                    </Radio>
+                                                    <Radio
+                                                        value="Trung bình"
+                                                        style={{
+                                                            color: "green",
+                                                        }}
+                                                    >
+                                                        Trung bình
+                                                    </Radio>
+                                                </Radio.Group>
+                                            </Form.Item>
+                                        </>
+                                    )}
+                                />
+                            </Form>
+
+                            <Row
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "end",
+                                    alignItems: "center",
+                                    marginBottom: "15px",
+                                }}
+                            >
+                                <Button disabled onClick={getCurrentPosition}>
+                                    Vị trí hiện tại
+                                </Button>
+                            </Row>
+
+                            <Row
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "end",
+                                    alignItems: "center",
+                                    marginBottom: "15px",
+                                }}
+                            >
+                                <Upload
+                                    beforeUpload={beforeUpload}
+                                    customRequest={handleUpload}
+                                    accept="image/*"
+                                >
+                                    <Button disabled icon={<UploadOutlined />}>
+                                        Thêm hình ảnh
+                                    </Button>
+                                </Upload>
+                            </Row>
+
+                            <Row
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "end",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                }}
+                            >
+                                <Button onClick={handleCancelEditRescueNeeded}>
+                                    Trở về
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    onClick={handleSubmit(
+                                        onSubmitEditRescueNeeded
+                                    )}
+                                    loading={loading}
+                                >
+                                    {loading ? "Đang gửi..." : "Cập nhật"}
+                                </Button>
+                            </Row>
+                        </Modal>
+
+                        <Col
+                            xs={24}
+                            sm={24}
+                            md={24}
+                            lg={12}
+                            xl={12}
                             style={{
-                              fontWeight: "600",
-                              color:
-                                item.disaster_priority === "Khẩn cấp" ||
-                                item.problem_priority === "Khẩn cấp"
-                                  ? "red"
-                                  : item.disaster_priority === "Trung bình" ||
-                                    item.problem_priority === "Trung bình"
-                                  ? "green"
-                                  : "inherit",
+                                height: "500px",
+                                background: borderRadiusLG,
                             }}
-                          >
-                            {item.disaster_priority || item.problem_priority}
-                          </Text>
-                        </Text>
-                      </Col>
+                        >
+                            <div
+                                id="map"
+                                style={{ width: "100%", height: "100%" }}
+                            ></div>
+                        </Col>
+
+                        {/* New */}
+                        <Col
+                            xs={24}
+                            sm={24}
+                            md={24}
+                            lg={6}
+                            xl={6}
+                            style={{
+                                height: "500px",
+                                background: "white",
+                                color: "black",
+                                border: "1px solid rgba(5, 5, 5, 0.06)",
+                                borderRadius: "10px",
+                            }}
+                        >
+                            <Col
+                                style={{
+                                    height: "50px",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    borderBottom:
+                                        "1px solid rgba(5, 5, 5, 0.06)",
+                                }}
+                            >
+                                <Typography.Title
+                                    level={1}
+                                    style={{
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        color: "black",
+                                        marginLeft: "10px",
+                                        marginBottom: 0,
+                                    }}
+                                >
+                                    Danh sách người cứu hộ
+                                </Typography.Title>
+                            </Col>
+                            <Col>
+                                <div className="problem-right">
+                                    <div className="select-status">
+                                        <select
+                                            id="form-type"
+                                            className="form-input"
+                                            name="status"
+                                            value={selectedOption}
+                                            onChange={(e) =>
+                                                setSelectedOption(
+                                                    e.target.value
+                                                )
+                                            }
+                                            style={{
+                                                fontSize: "16px",
+                                                padding: "10px",
+                                                marginBottom: "10px",
+                                            }}
+                                        >
+                                            <option value="related">
+                                                Những người bạn có thể giúp
+                                            </option>
+                                            <option value="userRproblem">
+                                                Những người có thể giúp bạn
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div className="rescuer">
+                                        {selectedOption === "related"
+                                            ? expertise.length > 0 &&
+                                              expertise
+                                                  .slice(0, 7)
+                                                  .map((item) => (
+                                                      <div
+                                                          className="problem-left__wrapp"
+                                                          key={item.id}
+                                                      >
+                                                          <span className="problem-avarta">
+                                                              <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                                          </span>
+                                                          <div className="problem-content">
+                                                              <h4 className="problem-name">
+                                                                  {
+                                                                      item.user_name
+                                                                  }
+                                                              </h4>
+                                                              <p className="problem-decs">
+                                                                  <strong>
+                                                                      Địa chỉ:
+                                                                  </strong>{" "}
+                                                                  {
+                                                                      item.user_address
+                                                                  }
+                                                              </p>
+                                                              <p className="problem-decs">
+                                                                  <strong>
+                                                                      SĐT:
+                                                                  </strong>{" "}
+                                                                  {
+                                                                      item.user_phone
+                                                                  }
+                                                              </p>
+                                                              <p className="problem-decs">
+                                                                  <strong>
+                                                                      Sự cố
+                                                                  </strong>{" "}
+                                                                  {item.name}
+                                                              </p>
+                                                          </div>
+                                                      </div>
+                                                  ))
+                                            : helpMe.length > 0 &&
+                                              helpMe.slice(0, 7).map((item) => (
+                                                  <div
+                                                      className="problem-left__wrapp"
+                                                      key={item.id}
+                                                  >
+                                                      <span className="problem-avarta">
+                                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                                      </span>
+                                                      <div className="problem-content">
+                                                          <h4 className="problem-name">
+                                                              {item.user_name}
+                                                          </h4>
+                                                          <p className="problem-decs">
+                                                              <strong>
+                                                                  Địa chỉ:
+                                                              </strong>{" "}
+                                                              {
+                                                                  item.user_address
+                                                              }
+                                                          </p>
+                                                          <p className="problem-decs">
+                                                              <strong>
+                                                                  SĐT:
+                                                              </strong>{" "}
+                                                              {item.user_phone}
+                                                          </p>
+                                                          <p className="problem-decs">
+                                                              <strong>
+                                                                  sở trường
+                                                              </strong>{" "}
+                                                              {item.specialty}
+                                                          </p>
+                                                      </div>
+                                                  </div>
+                                              ))}
+                                    </div>
+                                </div>
+                            </Col>
+                        </Col>
                     </Row>
-                  </Menu.Item>
-                ))}
-              </Menu>
-            </Col>
-
-            {/* Task 1 */}
-            <Modal
-              title={
-                <div style={{ textAlign: "center" }}>
-                  Thông tin người cần cứu hộ
-                </div>
-              }
-              open={isModalOpenEditRescueNeeded}
-              onCancel={handleCancelEditRescueNeeded}
-              centered
-              closeIcon={null}
-              footer={[]}
-            >
-              <Form
-                labelCol={{
-                  span: 6,
-                }}
-                wrapperCol={{
-                  span: 18,
-                }}
-                layout="horizontal"
-                style={{
-                  marginTop: "25px",
-                }}
-              >
-                <Controller
-                  name="name"
-                  control={control}
-                  defaultValue={selectedRescueNeeded?.name || ""}
-                  render={({ field }) => (
-                    <Form.Item
-                      label="Họ và tên"
-                      validateStatus={errors.name ? "error" : ""}
-                      help={errors.name ? errors.name.message : ""}
-                    >
-                      <Input {...field} readOnly placeholder="Nhập họ và tên" />
-                    </Form.Item>
-                  )}
-                />
-
-                <Controller
-                  name="phone"
-                  control={control}
-                  defaultValue={selectedRescueNeeded?.phone || ""}
-                  render={({ field }) => (
-                    <Form.Item
-                      label="Số điện thoại"
-                      validateStatus={errors.phone ? "error" : ""}
-                      help={errors.phone ? errors.phone.message : ""}
-                    >
-                      <Input
-                        {...field}
-                        readOnly
-                        placeholder="Nhập số điện thoại"
-                      />
-                    </Form.Item>
-                  )}
-                />
-
-                <Controller
-                  name="type"
-                  control={control}
-                  render={({ field }) => (
-                    <Form.Item
-                      label="Kiểu gặp nạn"
-                      validateStatus={errors.type ? "error" : ""}
-                      help={errors.type ? errors.type.message : ""}
-                    >
-                      <Select
-                        placeholder="Vui lòng chọn kiểu gặp nạn"
-                        defaultValue={emergencyType}
-                        onChange={handleChangeType}
-                        disabled
-                      >
-                        <Option value="Thiên tai">Thiên tai</Option>
-                        <Option value="Sự cố">Sự cố</Option>
-                      </Select>
-                    </Form.Item>
-                  )}
-                />
-
-                {emergencyType === "Thiên tai" && (
-                  <>
-                    <Controller
-                      name="naturalDisasterName"
-                      control={control}
-                      defaultValue={selectedRescueNeeded?.disaster_name || ""}
-                      render={({ field }) => (
-                        <Form.Item
-                          label="Tên thiên tai"
-                          validateStatus={
-                            errors.naturalDisasterName ? "error" : ""
-                          }
-                          help={
-                            errors.naturalDisasterName
-                              ? errors.naturalDisasterName.message
-                              : ""
-                          }
-                        >
-                          <Input
-                            {...field}
-                            readOnly
-                            placeholder="Nhập tên thiên tai"
-                          />
-                        </Form.Item>
-                      )}
-                    />
-
-                    <Controller
-                      name="naturalDisasterType"
-                      control={control}
-                      defaultValue={selectedRescueNeeded?.disaster_type || ""}
-                      render={({ field }) => (
-                        <Form.Item
-                          label="Loại thiên tai"
-                          validateStatus={
-                            errors.naturalDisasterType ? "error" : ""
-                          }
-                          help={
-                            errors.naturalDisasterType
-                              ? errors.naturalDisasterType.message
-                              : ""
-                          }
-                        >
-                          <Input
-                            {...field}
-                            readOnly
-                            placeholder="Nhập loại thiên tai"
-                          />
-                        </Form.Item>
-                      )}
-                    />
-                  </>
-                )}
-
-                {emergencyType === "Sự cố" && (
-                  <>
-                    <Controller
-                      name="incidentName"
-                      control={control}
-                      defaultValue={selectedRescueNeeded?.problem_name || ""}
-                      render={({ field }) => (
-                        <Form.Item
-                          label="Tên sự cố"
-                          validateStatus={errors.incidentName ? "error" : ""}
-                          help={
-                            errors.incidentName
-                              ? errors.incidentName.message
-                              : ""
-                          }
-                        >
-                          <Input
-                            {...field}
-                            readOnly
-                            placeholder="Nhập tên sự cố"
-                          />
-                        </Form.Item>
-                      )}
-                    />
-
-                    <Controller
-                      name="incidentType"
-                      control={control}
-                      defaultValue={selectedRescueNeeded?.problem_type || ""}
-                      render={({ field }) => (
-                        <Form.Item
-                          label="Loại sự cố"
-                          validateStatus={errors.incidentType ? "error" : ""}
-                          help={
-                            errors.incidentType
-                              ? errors.incidentType.message
-                              : ""
-                          }
-                        >
-                          <Input
-                            {...field}
-                            readOnly
-                            placeholder="Nhập loại sự cố"
-                          />
-                        </Form.Item>
-                      )}
-                    />
-                  </>
-                )}
-
-                <Controller
-                  name="address"
-                  control={control}
-                  defaultValue={selectedRescueNeeded?.address || ""}
-                  render={({ field }) => (
-                    <Form.Item
-                      label="Địa chỉ"
-                      validateStatus={errors.address ? "error" : ""}
-                      help={errors.address ? errors.address.message : ""}
-                    >
-                      <Input
-                        {...field}
-                        readOnly
-                        placeholder="Nhập địa chỉ"
-                        // value={valueAddress} // Đặt giá trị của input "address"
-                        onChange={(e) => setValueAddress(e.target.value)}
-                      />
-                    </Form.Item>
-                  )}
-                />
-
-                {/* Task 1 */}
-                <Controller
-                  name="priority"
-                  control={control}
-                  defaultValue={
-                    selectedRescueNeeded?.disaster_priority ||
-                    selectedRescueNeeded?.problem_priority
-                  }
-                  render={({ field, fieldState: { error } }) => (
-                    <>
-                      <Form.Item
-                        label="Độ ưu tiên"
-                        validateStatus={error ? "error" : ""}
-                        help={error?.message}
-                      >
-                        <Radio.Group {...field}>
-                          <Radio value="Khẩn cấp" style={{ color: "red" }}>
-                            Khẩn cấp
-                          </Radio>
-                          <Radio value="Trung bình" style={{ color: "green" }}>
-                            Trung bình
-                          </Radio>
-                        </Radio.Group>
-                      </Form.Item>
-                    </>
-                  )}
-                />
-              </Form>
-
-              <Row
-                style={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                }}
-              >
-                <Button disabled onClick={getCurrentPosition}>
-                  Vị trí hiện tại
-                </Button>
-              </Row>
-
-              <Row
-                style={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                }}
-              >
-                <Upload
-                  beforeUpload={beforeUpload}
-                  customRequest={handleUpload}
-                  accept="image/*"
-                >
-                  <Button disabled icon={<UploadOutlined />}>
-                    Thêm hình ảnh
-                  </Button>
-                </Upload>
-              </Row>
-
-              <Row
-                style={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                <Button onClick={handleCancelEditRescueNeeded}>Trở về</Button>
-                <Button
-                  type="primary"
-                  onClick={handleSubmit(onSubmitEditRescueNeeded)}
-                  loading={loading}
-                >
-                  {loading ? "Đang gửi..." : "Cập nhật"}
-                </Button>
-              </Row>
-            </Modal>
-
-            <Col
-              xs={24}
-              sm={24}
-              md={24}
-              lg={12}
-              xl={12}
-              style={{
-                height: "500px",
-                background: borderRadiusLG,
-              }}
-            >
-              <div id="map" style={{ width: "100%", height: "100%" }}></div>
-            </Col>
-
-            {/* New */}
-            <Col
-              xs={24}
-              sm={24}
-              md={24}
-              lg={6}
-              xl={6}
-              style={{
-                height: "500px",
-                background: "white",
-                color: "black",
-                border: "1px solid rgba(5, 5, 5, 0.06)",
-                borderRadius: "10px",
-              }}
-            >
-              <Col
-                style={{
-                  height: "50px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderBottom: "1px solid rgba(5, 5, 5, 0.06)",
-                }}
-              >
-                <Typography.Title
-                  level={1}
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "700",
-                    color: "black",
-                    marginLeft: "10px",
-                    marginBottom: 0,
-                  }}
-                >
-                  Danh sách người cứu hộ
-                </Typography.Title>
-              </Col>
-              <Menu
-                mode="inline"
-                style={{ height: "450px", overflowY: "auto" }}
-                // selectedKeys={selectedItem ? [String(selectedItem)] : []}
-                disabled={true}
-              >
-                {rescueSeekerList.map((item) => (
-                  <Menu.Item
-                    key={String(item.id)}
-                    // onClick={() => handleClick(item)}
-                    style={{
-                      height: "145px",
-                      border: "1px solid rgba(5, 5, 5, 0.06)",
-                    }}
-                  >
-                    <Row>
-                      <Col span={4}>
-                        <Avatar src={item.avatar} size={40} />
-                      </Col>
-                      <Col span={20}>
-                        <Text style={{ display: "block", marginBottom: "5px" }}>
-                          {item.name}
-                        </Text>
-                        <Text
-                          type="secondary"
-                          style={{ display: "block", fontSize: "13px" }}
-                        >
-                          Số điện thoại: {item.phone || "Chưa cập nhật"}
-                        </Text>
-                        {/* <Text
-                          type="secondary"
-                          style={{ display: "block", fontSize: "13px" }}
-                        >
-                          Kiểu gặp nạn:{" "}
-                          {item.disaster_name || item.problem_name}
-                        </Text>
-                        <Text
-                          type="secondary"
-                          style={{ display: "block", fontSize: "13px" }}
-                        >
-                          Địa chỉ: {item.address}
-                        </Text>
-                        <Text
-                          type="secondary"
-                          style={{ display: "block", fontSize: "13px" }}
-                        >
-                          Trạng thái:{" "}
-                          {item.disaster_status || item.problem_status}
-                        </Text> */}
-                      </Col>
-                    </Row>
-                  </Menu.Item>
-                ))}
-              </Menu>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </>
-  );
+                </Col>
+            </Row>
+        </>
+    );
 };
 
 export default Home;

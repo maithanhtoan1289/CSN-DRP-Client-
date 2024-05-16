@@ -15,6 +15,7 @@ const InforUser = () => {
             Authorization: `Bearer ${accessToken}`,
         },
     };
+
     const initInfo = {
         name: "",
         address: "",
@@ -22,34 +23,39 @@ const InforUser = () => {
         email: "",
     };
 
-    const [userInfo, setuserInfo] = useState(initInfo);
-    const [profile, setProfile] = useState([]);
+    const [profile, setProfile] = useState(null);
+    const [userInfo, setUserInfo] = useState(initInfo);
     const [rescuer, setRescuer] = useState({ specialty: "", description: "" });
     const [specialityData, setSpecialityData] = useState([]);
+    const [profileUpdate, setProfileUpdate] = useState(initInfo);
 
     useEffect(() => {
         dataProfile();
         dataSpeciality();
     }, []);
 
+    useEffect(() => {
+        if (profile) {
+            const profileData = {
+                name: profile.name,
+                address: profile.address,
+                phone: profile.phone,
+                email: profile.email,
+            };
+            setUserInfo(profileData);
+            setProfileUpdate(profileData);
+        }
+    }, [profile]);
+
     const handleChange = (e) => {
-        const { value, name } = e.target;
-        setuserInfo({
+        setUserInfo({
             ...userInfo,
-            [name]: value,
+            [e.target.name]: e.target.value,
         });
-    };
-
-    const hanldSubmit = (e) => {
-        e.preventDefault();
-
-        setuserInfo({
-            name: userInfo.name,
-            address: userInfo.address,
-            phone: userInfo.phone,
-            email: userInfo.email,
+        setProfileUpdate({
+            ...profileUpdate,
+            [e.target.name]: e.target.value,
         });
-        console.log(userInfo);
     };
 
     const handlePassword = (e) => {
@@ -63,7 +69,29 @@ const InforUser = () => {
                 token
             );
             setProfile(res.data.data);
-            console.log(res.data.data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const updateProfile = async (e) => {
+        e.preventDefault();
+        try {
+            if (
+                userInfo.name === profile.name &&
+                userInfo.address === profile.address &&
+                userInfo.phone === profile.phone &&
+                userInfo.email === profile.email
+            ) {
+                message.info("Thông tin của bạn không có sự thay đổi nào!");
+            } else {
+                await axios.put(
+                    "http://localhost:5000/api/users/updateprofile",
+                    profileUpdate,
+                    token
+                );
+                message.success("Cập nhật thông tin thành công.");
+            }
         } catch (err) {
             console.log(err);
         }
@@ -99,7 +127,6 @@ const InforUser = () => {
                 "http://localhost:5000/api/expertise/getExpertise",
                 token
             );
-            console.log(res.data.data);
             setSpecialityData(res.data.data);
         } catch (e) {
             console.log(e);
@@ -112,7 +139,7 @@ const InforUser = () => {
             <form
                 action=""
                 className="form-manage wrapp-form"
-                onSubmit={hanldSubmit}
+                onSubmit={updateProfile}
             >
                 <h3 className="form-heading">Quản lý thông tin của tôi</h3>
                 <div className="form-wrapp">
@@ -124,20 +151,20 @@ const InforUser = () => {
                             type="text"
                             id="name"
                             name="name"
-                            defaultValue={userInfo.name}
+                            value={userInfo.name}
                             onChange={handleChange}
                             className="form-input"
                         />
                     </div>
                     <div className="form-information">
                         <label htmlFor="address" className="form-title">
-                            Nơi ở hiện tại
+                            Địa chỉ
                         </label>
                         <input
                             type="text"
                             id="address"
                             name="address"
-                            defaultValue={userInfo.address}
+                            value={userInfo.address}
                             onChange={handleChange}
                             className="form-input"
                         />
@@ -152,7 +179,7 @@ const InforUser = () => {
                             type="phone"
                             id="phone"
                             name="phone"
-                            defaultValue={userInfo.phone}
+                            value={userInfo.phone}
                             onChange={handleChange}
                             className="form-input"
                         />
@@ -165,7 +192,7 @@ const InforUser = () => {
                             type="email"
                             id="email"
                             name="email"
-                            defaultValue={userInfo.email}
+                            value={userInfo.email}
                             onChange={handleChange}
                             className="form-input"
                         />
