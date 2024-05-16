@@ -182,14 +182,15 @@ const Home = () => {
   useEffect(() => {
     dispatch(getAllRescueSeeker());
   }, [dispatch]);
-  useEffect(() => {
-    if (userInfo?.role === "ROLE_RESCUER") {
-      dispatch(clearUserInfo());
-      Cookies.remove("accessToken");
-      Cookies.remove("refreshToken");
-      navigate("/login");
-    }
-  }, [dispatch, userInfo?.role, navigate]);
+  // Task 5
+  // useEffect(() => {
+  //   if (userInfo?.role === "ROLE_RESCUER") {
+  //     dispatch(clearUserInfo());
+  //     Cookies.remove("accessToken");
+  //     Cookies.remove("refreshToken");
+  //     navigate("/login");
+  //   }
+  // }, [dispatch, userInfo?.role, navigate]);
 
   // Event Handlers
   // Task 1

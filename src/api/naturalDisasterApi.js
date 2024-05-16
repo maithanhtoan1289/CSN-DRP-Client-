@@ -31,6 +31,17 @@ const naturalDisasterApi = {
     }
   },
 
+    // Task 5
+    addNaturalDisasterVersion3: async (data) => {
+      const url = "/natural-disasters/v3/add";
+      try {
+        const response = await axiosClient.post(url, data);
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+
   addNaturalDisasterStatus: async (data) => {
     const url = "/natural-disasters/add-status";
     try {

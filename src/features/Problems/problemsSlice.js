@@ -50,6 +50,19 @@ export const addProblemVersion2 = createAsyncThunk(
   }
 );
 
+// Task 5
+export const addProblemVersion3 = createAsyncThunk(
+  "naturalDisaster/addProblemVersion3",
+  async (data) => {
+    try {
+      const response = await problemApi.addProblemVersion3(data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 export const addProblemStatus = createAsyncThunk(
   "naturalDisaster/addProblemStatus",
   async (data) => {
@@ -131,6 +144,21 @@ const problemSlice = createSlice({
         state.error = null;
       })
       .addCase(addProblemVersion2.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+
+      // Task 5
+      // Add Problem Version 3
+      .addCase(addProblemVersion3.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(addProblemVersion3.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(addProblemVersion3.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
