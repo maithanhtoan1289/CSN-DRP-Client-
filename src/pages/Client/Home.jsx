@@ -133,176 +133,177 @@ const Home = () => {
     const [popupIndex, setPopupIndex] = useState(null);
     const [showDetailRescueNeeded, setShowDetailRescueNeeded] = useState(false);
 
-  // useEffect add map
-  useEffect(() => {
-    goongjs.accessToken = GOONG_MAP_KEY;
+    // useEffect add map
+    useEffect(() => {
+        goongjs.accessToken = GOONG_MAP_KEY;
 
-    // Tạo một biến để lưu trữ vị trí trung tâm mặc định
-    let defaultCenter = [106.70105355500004, 10.776553100000058];
+        // Tạo một biến để lưu trữ vị trí trung tâm mặc định
+        let defaultCenter = [106.70105355500004, 10.776553100000058];
 
-    // Kiểm tra xem markerPosition có giá trị [0, 0] không
-    if (markerPosition[0] === 0 && markerPosition[1] === 0) {
-      defaultCenter = [106.70105355500004, 10.776553100000058];
-    }
-
-    const map = new goongjs.Map({
-      container: "map",
-      style: "https://tiles.goong.io/assets/goong_map_web.json",
-      center: defaultCenter,
-      zoom: 9,
-    });
-
-    const marker = new goongjs.Marker({ color: "red" })
-      .setLngLat(markerPosition)
-      .addTo(map);
-
-    // Kiểm tra xem markerPosition có khác [0, 0] không trước khi thêm marker
-    if (markerPosition[0] !== 0 || markerPosition[1] !== 0) {
-      const marker = new goongjs.Marker({ color: "red" })
-        .setLngLat(markerPosition)
-        .addTo(map);
-
-      map.flyTo({
-        center: markerPosition,
-        zoom: 13, // Bạn có thể tùy chỉnh mức độ zoom ở đây
-        essential: true, // Cần thiết để tránh lỗi khi sử dụng flyTo trong useEffect
-      });
-    }
-
-    return () => {
-      map.remove();
-      marker.remove();
-    };
-  }, [markerPosition, coordinates, hasCoordinates, isLogin]);
-
-  // New
-  useEffect(() => {
-    dispatch(getAllRescueNeeded());
-  }, [dispatch]);
-  useEffect(() => {
-    dispatch(getAllRescueSeeker());
-  }, [dispatch]);
-  // Task 5
-  // useEffect(() => {
-  //   if (userInfo?.role === "ROLE_RESCUER") {
-  //     dispatch(clearUserInfo());
-  //     Cookies.remove("accessToken");
-  //     Cookies.remove("refreshToken");
-  //     navigate("/login");
-  //   }
-  // }, [dispatch, userInfo?.role, navigate]);
-
-  // Event Handlers
-  // Task 1
-  const showModalEditRescueNeeded = (item) => {
-    setIsModalOpenEditRescueNeeded(true);
-    setSelectedRescueNeeded(item);
-    if (item.disaster_type) {
-      setEmergencyType("Thiên tai");
-    } else {
-      setEmergencyType("Sự cố");
-    }
-  };
-  const handleCancelEditRescueNeeded = () => {
-    setIsModalOpenEditRescueNeeded(false);
-  };
-
-
-
-  const handleChangeType = (value) => {
-    setEmergencyType(value);
-  };
-
-  // Task 1
-  const onSubmitEditRescueNeeded = async (data) => {
-    try {
-      setLoading(true);
-
-      const { naturalDisasterName, priority } = data;
-      const { disaster_id, problem_id } = selectedRescueNeeded || {};
-
-      if (naturalDisasterName !== undefined) {
-        await dispatch(
-          editNaturalDisasterPriority({
-            naturalDisasterId: disaster_id,
-            priority,
-          })
-        );
-      } else {
-        await dispatch(
-          editProblemPriority({ problemId: problem_id, priority })
-        );
-      }
-
-      await dispatch(getAllRescueNeeded());
-      setLoading(false);
-      setIsModalOpenEditRescueNeeded(false);
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
-  };
-
-  const handleUpload = async (options) => {
-    const { onSuccess, onError, file } = options;
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/upload/add-image",
-        formData
-      );
-      onSuccess(response.data.url);
-      setUrlImage(response.data.url);
-      setImageUploaded(true);
-      // message.success("Image uploaded successfully");
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      onError(error);
-    }
-  };
-
-  const beforeUpload = (file) => {
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      message.error("Only image files are allowed");
-    }
-    return isImage;
-  };
-
-  const getCurrentPosition = async () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const latitude = position.coords.latitude;
-          const longitude = position.coords.longitude;
-
-          const latlng = `${latitude},%20${longitude}`;
-
-          console.log("latlng", latlng);
-
-          try {
-            const res = await dispatch(reverseGeocoding(latlng));
-            console.log("res", res.payload.data.results[0].address);
-            setValueAddress(res.payload.data.results[0].address);
-            // notification.success({
-            //   message: "Cập nhật vị trí thành công",
-            //   description: "Vị trí của bạn được cập nhật thành công!",
-            // });
-          } catch (error) {
-            console.error("Lỗi khi thực hiện reverse geocoding:", error);
-          }
-        },
-        (error) => {
-          console.error("Lỗi khi lấy vị trí hiện tại:", error);
+        // Kiểm tra xem markerPosition có giá trị [0, 0] không
+        if (markerPosition[0] === 0 && markerPosition[1] === 0) {
+            defaultCenter = [106.70105355500004, 10.776553100000058];
         }
-      );
-    } else {
-      console.error("Trình duyệt không hỗ trợ Geolocation");
-    }
-  };
+
+        const map = new goongjs.Map({
+            container: "map",
+            style: "https://tiles.goong.io/assets/goong_map_web.json",
+            center: defaultCenter,
+            zoom: 9,
+        });
+
+        const marker = new goongjs.Marker({ color: "red" })
+            .setLngLat(markerPosition)
+            .addTo(map);
+
+        // Kiểm tra xem markerPosition có khác [0, 0] không trước khi thêm marker
+        if (markerPosition[0] !== 0 || markerPosition[1] !== 0) {
+            const marker = new goongjs.Marker({ color: "red" })
+                .setLngLat(markerPosition)
+                .addTo(map);
+
+            map.flyTo({
+                center: markerPosition,
+                zoom: 13, // Bạn có thể tùy chỉnh mức độ zoom ở đây
+                essential: true, // Cần thiết để tránh lỗi khi sử dụng flyTo trong useEffect
+            });
+        }
+
+        return () => {
+            map.remove();
+            marker.remove();
+        };
+    }, [markerPosition, coordinates, hasCoordinates, isLogin]);
+
+    // New
+    useEffect(() => {
+        dispatch(getAllRescueNeeded());
+    }, [dispatch]);
+    useEffect(() => {
+        dispatch(getAllRescueSeeker());
+    }, [dispatch]);
+    // Task 5
+    // useEffect(() => {
+    //   if (userInfo?.role === "ROLE_RESCUER") {
+    //     dispatch(clearUserInfo());
+    //     Cookies.remove("accessToken");
+    //     Cookies.remove("refreshToken");
+    //     navigate("/login");
+    //   }
+    // }, [dispatch, userInfo?.role, navigate]);
+
+    // Event Handlers
+    // Task 1
+    const showModalEditRescueNeeded = (item) => {
+        setIsModalOpenEditRescueNeeded(true);
+        setSelectedRescueNeeded(item);
+        if (item.disaster_type) {
+            setEmergencyType("Thiên tai");
+        } else {
+            setEmergencyType("Sự cố");
+        }
+    };
+    const handleCancelEditRescueNeeded = () => {
+        setIsModalOpenEditRescueNeeded(false);
+    };
+
+    const handleChangeType = (value) => {
+        setEmergencyType(value);
+    };
+
+    // Task 1
+    const onSubmitEditRescueNeeded = async (data) => {
+        try {
+            setLoading(true);
+
+            const { naturalDisasterName, priority } = data;
+            const { disaster_id, problem_id } = selectedRescueNeeded || {};
+
+            if (naturalDisasterName !== undefined) {
+                await dispatch(
+                    editNaturalDisasterPriority({
+                        naturalDisasterId: disaster_id,
+                        priority,
+                    })
+                );
+            } else {
+                await dispatch(
+                    editProblemPriority({ problemId: problem_id, priority })
+                );
+            }
+
+            await dispatch(getAllRescueNeeded());
+            setLoading(false);
+            setIsModalOpenEditRescueNeeded(false);
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+        }
+    };
+
+    const handleUpload = async (options) => {
+        const { onSuccess, onError, file } = options;
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        try {
+            const response = await axios.post(
+                "http://localhost:5000/api/upload/add-image",
+                formData
+            );
+            onSuccess(response.data.url);
+            setUrlImage(response.data.url);
+            setImageUploaded(true);
+            // message.success("Image uploaded successfully");
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            onError(error);
+        }
+    };
+
+    const beforeUpload = (file) => {
+        const isImage = file.type.startsWith("image/");
+        if (!isImage) {
+            message.error("Only image files are allowed");
+        }
+        return isImage;
+    };
+
+    const getCurrentPosition = async () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    const latlng = `${latitude},%20${longitude}`;
+
+                    console.log("latlng", latlng);
+
+                    try {
+                        const res = await dispatch(reverseGeocoding(latlng));
+                        console.log("res", res.payload.data.results[0].address);
+                        setValueAddress(res.payload.data.results[0].address);
+                        // notification.success({
+                        //   message: "Cập nhật vị trí thành công",
+                        //   description: "Vị trí của bạn được cập nhật thành công!",
+                        // });
+                    } catch (error) {
+                        console.error(
+                            "Lỗi khi thực hiện reverse geocoding:",
+                            error
+                        );
+                    }
+                },
+                (error) => {
+                    console.error("Lỗi khi lấy vị trí hiện tại:", error);
+                }
+            );
+        } else {
+            console.error("Trình duyệt không hỗ trợ Geolocation");
+        }
+    };
 
     // New
     const handleClick = async (item, index) => {
@@ -311,7 +312,6 @@ const Home = () => {
         const { lat, lng } = JSON.parse(item.coordinates);
         setMarkerPosition([lng, lat]);
     };
-
 
     // Task 1
     const sortedRescueNeededList = rescueNeededList.slice().sort((a, b) => {
@@ -345,43 +345,53 @@ const Home = () => {
         return 0;
     });
 
-     // =========================================================
-     const accessToken = Cookies.get("accessToken");
-     const token = {
-         headers: {
-             "Content-Type": "application/json",
-             Authorization: `Bearer ${accessToken}`,
-         },
-     };
-     const [selectedOption, setSelectedOption] = useState("related");
-     const [expertise, setExpertise] = useState([]);
-     const [helpMe, setHelpMe] = useState([]);
- 
-     useEffect(() => {
-         dataRescuer();
-     }, [selectedOption]);
- 
-     const dataRescuer = async () => {
-         try {
-             if (selectedOption === "related") {
-                 const res = await axios.get(
-                     "http://localhost:5000/api/expertise/related",
-                     token
-                 );
-                 setExpertise(res.data.incidents);
-             } else if (selectedOption === "userRproblem") {
-                 const res = await axios.get(
-                     "http://localhost:5000/api/expertise/userRproblem",
-                     token
-                 );
-                 setHelpMe(res.data.relatedUsers);
-             }
-         } catch (e) {
-             console.log(e);
-         }
-     };
-     // =========================================================
+    // =========================================================
+    const accessToken = Cookies.get("accessToken");
+    const token = {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+    };
+    const [selectedOption, setSelectedOption] = useState("related");
+    const [expertise, setExpertise] = useState([]);
+    const [helpMe, setHelpMe] = useState([]);
 
+    useEffect(() => {
+        dataRescuer();
+    }, [selectedOption]);
+
+    const dataRescuer = async () => {
+        try {
+            if (selectedOption === "related") {
+                const res = await axios.get(
+                    "http://localhost:5000/api/expertise/related",
+                    token
+                );
+
+                const problems = res.data.problems;
+                const naturalDisasters = res.data.natural_disasters;
+                const incidents = res.data.incidents;
+
+                const combinedData = [
+                    ...problems,
+                    ...naturalDisasters,
+                    ...incidents,
+                ];
+
+                setExpertise(combinedData);
+            } else if (selectedOption === "userRproblem") {
+                const res = await axios.get(
+                    "http://localhost:5000/api/expertise/userRproblem",
+                    token
+                );
+                setHelpMe(res.data.relatedUsers);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+    // =========================================================
 
     return (
         <>
@@ -1038,64 +1048,63 @@ const Home = () => {
                                         </select>
                                     </div>
 
-                                    <div className="rescuer">
+                                    <div
+                                        className="rescuer"
+                                        style={{
+                                            height: "380px",
+                                            overflow: "auto",
+                                        }}
+                                    >
                                         {selectedOption === "related"
                                             ? expertise.length > 0 &&
-                                              expertise
-                                                  .slice(0, 7)
-                                                  .map((item) => (
-                                                      <div
-                                                          className="problem-left__wrapp"
-                                                          key={item.id}
-                                                      >
-                                                          <span className="problem-avarta">
-                                                              <PersonOutlineOutlinedIcon className="avarta-icon" />
-                                                          </span>
-                                                          <div className="problem-content">
-                                                              <h4 className="problem-name">
-                                                                  {
-                                                                      item.user_name
-                                                                  }
-                                                              </h4>
-                                                              <p className="problem-decs">
-                                                                  <strong>
-                                                                      Địa chỉ:
-                                                                  </strong>{" "}
-                                                                  {
-                                                                      item.user_address
-                                                                  }
-                                                              </p>
-                                                              <p className="problem-decs">
-                                                                  <strong>
-                                                                      SĐT:
-                                                                  </strong>{" "}
-                                                                  {
-                                                                      item.user_phone
-                                                                  }
-                                                              </p>
-                                                              <p className="problem-decs">
-                                                                  <strong>
-                                                                      Sự cố
-                                                                  </strong>{" "}
-                                                                  {item.name}
-                                                              </p>
-                                                          </div>
-                                                      </div>
-                                                  ))
-                                            : helpMe.length > 0 &&
-                                              helpMe.slice(0, 7).map((item) => (
+                                              expertise.map((item) => (
                                                   <div
-                                                      className="problem-left__wrapp"
                                                       key={item.id}
+                                                      style={{
+                                                          display: "flex",
+                                                          padding: "14px",
+                                                          marginBottom: "10px",
+                                                          borderRadius: "10px",
+                                                          backgroundColor:
+                                                              "#fff",
+                                                          borderBottom:
+                                                              "1px solid #ccc",
+                                                      }}
                                                   >
-                                                      <span className="problem-avarta">
-                                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                                      <span
+                                                          style={{
+                                                              minWidth: "40px",
+                                                              height: "40px",
+                                                              display: "flex",
+                                                              alignItems:
+                                                                  "center",
+                                                              justifyContent:
+                                                                  "center",
+                                                              borderRadius:
+                                                                  "50%",
+                                                              marginRight:
+                                                                  "6px",
+                                                              backgroundColor:
+                                                                  "#f1f1f1",
+                                                          }}
+                                                      >
+                                                          <PersonOutlineOutlinedIcon
+                                                              style={{
+                                                                  fontSize:
+                                                                      "26px",
+                                                              }}
+                                                          />
                                                       </span>
                                                       <div className="problem-content">
-                                                          <h4 className="problem-name">
+                                                          <h4
+                                                              style={{
+                                                                  lineHeight:
+                                                                      "22px",
+                                                              }}
+                                                          >
                                                               {item.user_name}
                                                           </h4>
-                                                          <p className="problem-decs">
+                                                          <p>
                                                               <strong>
                                                                   Địa chỉ:
                                                               </strong>{" "}
@@ -1103,13 +1112,84 @@ const Home = () => {
                                                                   item.user_address
                                                               }
                                                           </p>
-                                                          <p className="problem-decs">
+                                                          <p>
                                                               <strong>
                                                                   SĐT:
                                                               </strong>{" "}
                                                               {item.user_phone}
                                                           </p>
-                                                          <p className="problem-decs">
+                                                          <p>
+                                                              <strong>
+                                                                  Sự cố
+                                                              </strong>{" "}
+                                                              {item.name}
+                                                          </p>
+                                                      </div>
+                                                  </div>
+                                              ))
+                                            : helpMe.length > 0 &&
+                                              helpMe.map((item) => (
+                                                  <div
+                                                      key={item.id}
+                                                      style={{
+                                                          display: "flex",
+                                                          padding: "14px",
+                                                          marginBottom: "10px",
+                                                          borderRadius: "10px",
+                                                          backgroundColor:
+                                                              "#fff",
+                                                          borderBottom:
+                                                              "1px solid #ccc",
+                                                      }}
+                                                  >
+                                                      <span
+                                                          style={{
+                                                              minWidth: "40px",
+                                                              height: "40px",
+                                                              display: "flex",
+                                                              alignItems:
+                                                                  "center",
+                                                              justifyContent:
+                                                                  "center",
+                                                              borderRadius:
+                                                                  "50%",
+                                                              marginRight:
+                                                                  "6px",
+                                                              backgroundColor:
+                                                                  "#f1f1f1",
+                                                          }}
+                                                      >
+                                                          <PersonOutlineOutlinedIcon
+                                                              style={{
+                                                                  fontSize:
+                                                                      "26px",
+                                                              }}
+                                                          />
+                                                      </span>
+                                                      <div className="problem-content">
+                                                          <h4
+                                                              style={{
+                                                                  lineHeight:
+                                                                      "22px",
+                                                              }}
+                                                          >
+                                                              {item.user_name}
+                                                          </h4>
+                                                          <p>
+                                                              <strong>
+                                                                  Địa chỉ:
+                                                              </strong>{" "}
+                                                              {
+                                                                  item.user_address
+                                                              }
+                                                          </p>
+                                                          <p>
+                                                              <strong>
+                                                                  SĐT:
+                                                              </strong>{" "}
+                                                              {item.user_phone}
+                                                          </p>
+                                                          <p>
                                                               <strong>
                                                                   sở trường
                                                               </strong>{" "}

@@ -164,7 +164,18 @@ const Incident = () => {
                     "http://localhost:5000/api/expertise/related",
                     token
                 );
-                setExpertise(res.data.incidents);
+
+                const problems = res.data.problems;
+                const naturalDisasters = res.data.natural_disasters;
+                const incidents = res.data.incidents;
+
+                const combinedData = [
+                    ...problems,
+                    ...naturalDisasters,
+                    ...incidents,
+                ];
+
+                setExpertise(combinedData);
             } else if (selectedOption === "userRproblem") {
                 const res = await axios.get(
                     "http://localhost:5000/api/expertise/userRproblem",
@@ -434,19 +445,18 @@ const Incident = () => {
                 </div>
 
                 <div className="problem-right">
-                    {/* <h2 className="problem-left-heading">
-                        Danh sách người cứu hộ
-                    </h2> */}
                     <div className="select-status">
-                        {/* <label className="form-title" htmlFor="form-type">
-                            Trạng thái
-                        </label> */}
                         <select
                             id="form-type"
                             className="form-input"
                             name="status"
                             value={selectedOption}
                             onChange={(e) => setSelectedOption(e.target.value)}
+                            style={{
+                                fontSize: "16px",
+                                padding: "10px",
+                                marginBottom: "10px",
+                            }}
                         >
                             <option value="related">
                                 Những người bạn có thể giúp
@@ -457,30 +467,52 @@ const Incident = () => {
                         </select>
                     </div>
 
-                    <div className="rescuer">
+                    <div
+                        className="rescuer"
+                        style={{ height: "400px", overflow: "auto" }}
+                    >
                         {selectedOption === "related"
                             ? expertise.length > 0 &&
                               expertise.slice(0, 7).map((item) => (
                                   <div
-                                      className="problem-left__wrapp"
                                       key={item.id}
+                                      style={{
+                                          display: "flex",
+                                          padding: "12px",
+                                          marginBottom: "14px",
+                                          borderRadius: "10px",
+                                          backgroundColor: "#fff",
+                                      }}
                                   >
-                                      <span className="problem-avarta">
-                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                      <span
+                                          style={{
+                                              minWidth: "40px",
+                                              height: "40px",
+                                              display: "flex",
+                                              alignItems: "center",
+                                              justifyContent: "center",
+                                              borderRadius: "50%",
+                                              marginRight: "6px",
+                                              backgroundColor: "#f1f1f1",
+                                          }}
+                                      >
+                                          <PersonOutlineOutlinedIcon
+                                              style={{ fontSize: "2.6rem" }}
+                                          />
                                       </span>
                                       <div className="problem-content">
                                           <h4 className="problem-name">
                                               {item.user_name}
                                           </h4>
-                                          <p className="problem-decs">
+                                          <p>
                                               <strong>Địa chỉ:</strong>{" "}
                                               {item.user_address}
                                           </p>
-                                          <p className="problem-decs">
+                                          <p>
                                               <strong>SĐT:</strong>{" "}
                                               {item.user_phone}
                                           </p>
-                                          <p className="problem-decs">
+                                          <p>
                                               <strong>Sự cố</strong> {item.name}
                                           </p>
                                       </div>
@@ -489,25 +521,44 @@ const Incident = () => {
                             : helpMe.length > 0 &&
                               helpMe.slice(0, 7).map((item) => (
                                   <div
-                                      className="problem-left__wrapp"
                                       key={item.id}
+                                      style={{
+                                          display: "flex",
+                                          padding: "12px",
+                                          marginBottom: "14px",
+                                          borderRadius: "10px",
+                                          backgroundColor: "#fff",
+                                      }}
                                   >
-                                      <span className="problem-avarta">
-                                          <PersonOutlineOutlinedIcon className="avarta-icon" />
+                                      <span
+                                          style={{
+                                              minWidth: "40px",
+                                              height: "40px",
+                                              display: "flex",
+                                              alignItems: "center",
+                                              justifyContent: "center",
+                                              borderRadius: "50%",
+                                              marginRight: "6px",
+                                              backgroundColor: "#f1f1f1",
+                                          }}
+                                      >
+                                          <PersonOutlineOutlinedIcon
+                                              style={{ fontSize: "2.6rem" }}
+                                          />
                                       </span>
                                       <div className="problem-content">
                                           <h4 className="problem-name">
                                               {item.user_name}
                                           </h4>
-                                          <p className="problem-decs">
+                                          <p>
                                               <strong>Địa chỉ:</strong>{" "}
                                               {item.user_address}
                                           </p>
-                                          <p className="problem-decs">
+                                          <p>
                                               <strong>SĐT:</strong>{" "}
                                               {item.user_phone}
                                           </p>
-                                          <p className="problem-decs">
+                                          <p>
                                               <strong>sở trường</strong>{" "}
                                               {item.specialty}
                                           </p>
