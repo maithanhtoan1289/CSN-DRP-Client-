@@ -72,21 +72,18 @@ a {
     }
 
     .problem-wrapp {
-        display: flex;
         margin-bottom: 40px;
 
         .incident_map {
-            width: 65%;
-            min-height: 560px;
+            width: 100%;
             margin-right: 30px;
             position: relative;
             border-radius: 10px;
-            border: 1px solid #ccc;
-            overflow: hidden;
     
             .problem-map {
                 width: 100%;
-                height: 100%;
+                height: 560px;
+                border: 1px solid #ccc;
                 background-color: #ccc;
             }
     
@@ -135,50 +132,9 @@ a {
             }
         }
 
-        .incident-form-left {
-            width: 35%;
-            min-height: 560px;
-            padding: 20px 30px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            background-color: var(--white-color);
-        }
+        
 
-        .right-title {
-            text-align: center;
-        }
-
-        .problem-right__form {
-            margin-top: 22px;
-
-            .right-form {
-                display: grid;
-                margin-bottom: 12px;
-
-                .form-title {
-                    font-weight: 500;
-                    margin-bottom: 6px;
-                    font-size: 16px;
-                }
-
-                .form-input {
-                    width: 100%;
-                    max-height: 250px;
-                    padding: 10px 16px;
-                    font-size: 1.6rem;
-                    border-radius: 4px;
-                    border: 1px solid var(--smoke-color);
-                    resize: vertical;
-                    outline: none;
-                }
-            }
-
-            .right-btn {
-                display: flex;
-                justify-content: space-between;
-                margin-top: 30px;
-            }
-        }
+        
     }
 
     .incident-form {
@@ -191,6 +147,8 @@ a {
         margin-bottom: 20px;
     }
 
+    
+
     .problem-share {
         display: flex;
         width: 100%;
@@ -199,6 +157,16 @@ a {
         .problem-left {
             width: 65%;
             margin-right: 30px;
+        }
+
+        
+
+        .problem-left__wrapp {
+            display: flex;
+            padding: 12px;
+            margin-bottom: 14px;
+            border-radius: 10px;
+            background-color: var(--white-color);
         }
 
         .problem-avarta {
@@ -231,7 +199,50 @@ a {
 
         .problem-right {
             width: 35%;
+            .incident-form-left {
+                width: 100%;
+                min-height: 560px;
+                padding: 20px 30px;
+                border-radius: 10px;
+                border: 1px solid #ccc;
+                background-color: var(--white-color);
+            }
 
+            .right-title {
+                text-align: center;
+            }
+    
+            .problem-right__form {
+                margin-top: 22px;
+    
+                .right-form {
+                    display: grid;
+                    margin-bottom: 12px;
+    
+                    .form-title {
+                        font-weight: 500;
+                        margin-bottom: 6px;
+                        font-size: 16px;
+                    }
+    
+                    .form-input {
+                        width: 100%;
+                        max-height: 250px;
+                        padding: 10px 16px;
+                        font-size: 1.6rem;
+                        border-radius: 4px;
+                        border: 1px solid var(--smoke-color);
+                        resize: vertical;
+                        outline: none;
+                    }
+                }
+    
+                .right-btn {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 30px;
+                }
+            }
         }
     }
 
@@ -262,5 +273,41 @@ a {
         color: #ff5452;
         margin-top: 4px;
         font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .incident .problem-wrapp .incident_map .problem-map {
+        height: 300px;
+    }
+
+    .incident .problem-wrapp .incident_map .problem-form {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .incident .problem-wrapp .incident_map .problem-form .from-address {
+        display: block;
+    }
+
+    .incident .problem-wrapp .incident_map .problem-form .from-address .from-input {
+        width: 100%;
+    }
+
+    .incident .problem-share {
+        flex-wrap: wrap;
+    }
+
+    .problem-left-heading {
+        font-size: 18px;
+    }
+
+    .incident .problem-share .problem-left,
+    .incident .problem-share .problem-right {
+        width: 100%;
+        margin: 0;
     }
 }
