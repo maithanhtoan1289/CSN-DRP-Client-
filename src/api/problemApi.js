@@ -31,6 +31,17 @@ const problemApi = {
     }
   },
 
+  // Task 5
+  addProblemVersion3: async (data) => {
+    const url = "/problems/v3/add";
+    try {
+      const response = await axiosClient.post(url, data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   addProblemStatus: async (data) => {
     const url = "/problems/add-status";
     try {

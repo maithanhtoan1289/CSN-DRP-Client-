@@ -55,6 +55,21 @@ export const addNaturalDisasterVersion2 = createAsyncThunk(
   }
 );
 
+// Task 5
+export const addNaturalDisasterVersion3 = createAsyncThunk(
+  "naturalDisaster/addNaturalDisasterVersion3",
+  async (data) => {
+    try {
+      const response = await naturalDisasterApi.addNaturalDisasterVersion3(
+        data
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 export const addNaturalDisasterStatus = createAsyncThunk(
   "naturalDisaster/addNaturalDisasterStatus",
   async (data) => {
@@ -144,6 +159,21 @@ const naturalDisasterSlice = createSlice({
         state.error = null;
       })
       .addCase(addNaturalDisasterVersion2.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+
+      // Task 5
+      // Add Natural Disaster Version 3
+      .addCase(addNaturalDisasterVersion3.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(addNaturalDisasterVersion3.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(addNaturalDisasterVersion3.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })

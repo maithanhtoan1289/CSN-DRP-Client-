@@ -133,176 +133,176 @@ const Home = () => {
     const [popupIndex, setPopupIndex] = useState(null);
     const [showDetailRescueNeeded, setShowDetailRescueNeeded] = useState(false);
 
-    // useEffect add map
-    useEffect(() => {
-        goongjs.accessToken = GOONG_MAP_KEY;
+  // useEffect add map
+  useEffect(() => {
+    goongjs.accessToken = GOONG_MAP_KEY;
 
-        // Tạo một biến để lưu trữ vị trí trung tâm mặc định
-        let defaultCenter = [106.70105355500004, 10.776553100000058];
+    // Tạo một biến để lưu trữ vị trí trung tâm mặc định
+    let defaultCenter = [106.70105355500004, 10.776553100000058];
 
-        // Kiểm tra xem markerPosition có giá trị [0, 0] không
-        if (markerPosition[0] === 0 && markerPosition[1] === 0) {
-            defaultCenter = [106.70105355500004, 10.776553100000058];
-        }
+    // Kiểm tra xem markerPosition có giá trị [0, 0] không
+    if (markerPosition[0] === 0 && markerPosition[1] === 0) {
+      defaultCenter = [106.70105355500004, 10.776553100000058];
+    }
 
-        const map = new goongjs.Map({
-            container: "map",
-            style: "https://tiles.goong.io/assets/goong_map_web.json",
-            center: defaultCenter,
-            zoom: 9,
-        });
+    const map = new goongjs.Map({
+      container: "map",
+      style: "https://tiles.goong.io/assets/goong_map_web.json",
+      center: defaultCenter,
+      zoom: 9,
+    });
 
-        const marker = new goongjs.Marker({ color: "red" })
-            .setLngLat(markerPosition)
-            .addTo(map);
+    const marker = new goongjs.Marker({ color: "red" })
+      .setLngLat(markerPosition)
+      .addTo(map);
 
-        // Kiểm tra xem markerPosition có khác [0, 0] không trước khi thêm marker
-        if (markerPosition[0] !== 0 || markerPosition[1] !== 0) {
-            const marker = new goongjs.Marker({ color: "red" })
-                .setLngLat(markerPosition)
-                .addTo(map);
+    // Kiểm tra xem markerPosition có khác [0, 0] không trước khi thêm marker
+    if (markerPosition[0] !== 0 || markerPosition[1] !== 0) {
+      const marker = new goongjs.Marker({ color: "red" })
+        .setLngLat(markerPosition)
+        .addTo(map);
 
-            map.flyTo({
-                center: markerPosition,
-                zoom: 13, // Bạn có thể tùy chỉnh mức độ zoom ở đây
-                essential: true, // Cần thiết để tránh lỗi khi sử dụng flyTo trong useEffect
-            });
-        }
+      map.flyTo({
+        center: markerPosition,
+        zoom: 13, // Bạn có thể tùy chỉnh mức độ zoom ở đây
+        essential: true, // Cần thiết để tránh lỗi khi sử dụng flyTo trong useEffect
+      });
+    }
 
-        return () => {
-            map.remove();
-            marker.remove();
-        };
-    }, [markerPosition, coordinates, hasCoordinates, isLogin]);
-
-    // New
-    useEffect(() => {
-        dispatch(getAllRescueNeeded());
-    }, [dispatch]);
-    useEffect(() => {
-        dispatch(getAllRescueSeeker());
-    }, [dispatch]);
-    useEffect(() => {
-        if (userInfo?.role === "ROLE_RESCUER") {
-            dispatch(clearUserInfo());
-            Cookies.remove("accessToken");
-            Cookies.remove("refreshToken");
-            navigate("/login");
-        }
-    }, [dispatch, userInfo?.role, navigate]);
-
-    // Event Handlers
-    // Task 1
-    const showModalEditRescueNeeded = (item) => {
-        setIsModalOpenEditRescueNeeded(true);
-        setSelectedRescueNeeded(item);
-        if (item.disaster_type) {
-            setEmergencyType("Thiên tai");
-        } else {
-            setEmergencyType("Sự cố");
-        }
+    return () => {
+      map.remove();
+      marker.remove();
     };
-    const handleCancelEditRescueNeeded = () => {
-        setIsModalOpenEditRescueNeeded(false);
-    };
+  }, [markerPosition, coordinates, hasCoordinates, isLogin]);
 
-    const handleChangeType = (value) => {
-        setEmergencyType(value);
-    };
+  // New
+  useEffect(() => {
+    dispatch(getAllRescueNeeded());
+  }, [dispatch]);
+  useEffect(() => {
+    dispatch(getAllRescueSeeker());
+  }, [dispatch]);
+  // Task 5
+  // useEffect(() => {
+  //   if (userInfo?.role === "ROLE_RESCUER") {
+  //     dispatch(clearUserInfo());
+  //     Cookies.remove("accessToken");
+  //     Cookies.remove("refreshToken");
+  //     navigate("/login");
+  //   }
+  // }, [dispatch, userInfo?.role, navigate]);
 
-    // Task 1
-    const onSubmitEditRescueNeeded = async (data) => {
-        try {
-            setLoading(true);
+  // Event Handlers
+  // Task 1
+  const showModalEditRescueNeeded = (item) => {
+    setIsModalOpenEditRescueNeeded(true);
+    setSelectedRescueNeeded(item);
+    if (item.disaster_type) {
+      setEmergencyType("Thiên tai");
+    } else {
+      setEmergencyType("Sự cố");
+    }
+  };
+  const handleCancelEditRescueNeeded = () => {
+    setIsModalOpenEditRescueNeeded(false);
+  };
 
-            const { naturalDisasterName, priority } = data;
-            const { disaster_id, problem_id } = selectedRescueNeeded || {};
 
-            if (naturalDisasterName !== undefined) {
-                await dispatch(
-                    editNaturalDisasterPriority({
-                        naturalDisasterId: disaster_id,
-                        priority,
-                    })
-                );
-            } else {
-                await dispatch(
-                    editProblemPriority({ problemId: problem_id, priority })
-                );
-            }
 
-            await dispatch(getAllRescueNeeded());
-            setLoading(false);
-            setIsModalOpenEditRescueNeeded(false);
-        } catch (error) {
-            console.log(error);
-            setLoading(false);
+  const handleChangeType = (value) => {
+    setEmergencyType(value);
+  };
+
+  // Task 1
+  const onSubmitEditRescueNeeded = async (data) => {
+    try {
+      setLoading(true);
+
+      const { naturalDisasterName, priority } = data;
+      const { disaster_id, problem_id } = selectedRescueNeeded || {};
+
+      if (naturalDisasterName !== undefined) {
+        await dispatch(
+          editNaturalDisasterPriority({
+            naturalDisasterId: disaster_id,
+            priority,
+          })
+        );
+      } else {
+        await dispatch(
+          editProblemPriority({ problemId: problem_id, priority })
+        );
+      }
+
+      await dispatch(getAllRescueNeeded());
+      setLoading(false);
+      setIsModalOpenEditRescueNeeded(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  const handleUpload = async (options) => {
+    const { onSuccess, onError, file } = options;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/upload/add-image",
+        formData
+      );
+      onSuccess(response.data.url);
+      setUrlImage(response.data.url);
+      setImageUploaded(true);
+      // message.success("Image uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      onError(error);
+    }
+  };
+
+  const beforeUpload = (file) => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("Only image files are allowed");
+    }
+    return isImage;
+  };
+
+  const getCurrentPosition = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+
+          const latlng = `${latitude},%20${longitude}`;
+
+          console.log("latlng", latlng);
+
+          try {
+            const res = await dispatch(reverseGeocoding(latlng));
+            console.log("res", res.payload.data.results[0].address);
+            setValueAddress(res.payload.data.results[0].address);
+            // notification.success({
+            //   message: "Cập nhật vị trí thành công",
+            //   description: "Vị trí của bạn được cập nhật thành công!",
+            // });
+          } catch (error) {
+            console.error("Lỗi khi thực hiện reverse geocoding:", error);
+          }
+        },
+        (error) => {
+          console.error("Lỗi khi lấy vị trí hiện tại:", error);
         }
-    };
-
-    const handleUpload = async (options) => {
-        const { onSuccess, onError, file } = options;
-
-        const formData = new FormData();
-        formData.append("image", file);
-
-        try {
-            const response = await axios.post(
-                "http://localhost:5000/api/upload/add-image",
-                formData
-            );
-            onSuccess(response.data.url);
-            setUrlImage(response.data.url);
-            setImageUploaded(true);
-            // message.success("Image uploaded successfully");
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            onError(error);
-        }
-    };
-
-    const beforeUpload = (file) => {
-        const isImage = file.type.startsWith("image/");
-        if (!isImage) {
-            message.error("Only image files are allowed");
-        }
-        return isImage;
-    };
-
-    const getCurrentPosition = async () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-
-                    const latlng = `${latitude},%20${longitude}`;
-
-                    console.log("latlng", latlng);
-
-                    try {
-                        const res = await dispatch(reverseGeocoding(latlng));
-                        console.log("res", res.payload.data.results[0].address);
-                        setValueAddress(res.payload.data.results[0].address);
-                        // notification.success({
-                        //   message: "Cập nhật vị trí thành công",
-                        //   description: "Vị trí của bạn được cập nhật thành công!",
-                        // });
-                    } catch (error) {
-                        console.error(
-                            "Lỗi khi thực hiện reverse geocoding:",
-                            error
-                        );
-                    }
-                },
-                (error) => {
-                    console.error("Lỗi khi lấy vị trí hiện tại:", error);
-                }
-            );
-        } else {
-            console.error("Trình duyệt không hỗ trợ Geolocation");
-        }
-    };
+      );
+    } else {
+      console.error("Trình duyệt không hỗ trợ Geolocation");
+    }
+  };
 
     // New
     const handleClick = async (item, index) => {
@@ -312,9 +312,6 @@ const Home = () => {
         setMarkerPosition([lng, lat]);
     };
 
-    console.log("setSelectedItem", selectedItem);
-    console.log("setSelectedRescueNeeded", selectedRescueNeeded);
-    console.log("setShowDetailRescueNeeded", showDetailRescueNeeded);
 
     // Task 1
     const sortedRescueNeededList = rescueNeededList.slice().sort((a, b) => {
@@ -348,42 +345,43 @@ const Home = () => {
         return 0;
     });
 
-    // =========================================================
-    const accessToken = Cookies.get("accessToken");
-    const token = {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-        },
-    };
-    const [selectedOption, setSelectedOption] = useState("related");
-    const [expertise, setExpertise] = useState([]);
-    const [helpMe, setHelpMe] = useState([]);
+     // =========================================================
+     const accessToken = Cookies.get("accessToken");
+     const token = {
+         headers: {
+             "Content-Type": "application/json",
+             Authorization: `Bearer ${accessToken}`,
+         },
+     };
+     const [selectedOption, setSelectedOption] = useState("related");
+     const [expertise, setExpertise] = useState([]);
+     const [helpMe, setHelpMe] = useState([]);
+ 
+     useEffect(() => {
+         dataRescuer();
+     }, [selectedOption]);
+ 
+     const dataRescuer = async () => {
+         try {
+             if (selectedOption === "related") {
+                 const res = await axios.get(
+                     "http://localhost:5000/api/expertise/related",
+                     token
+                 );
+                 setExpertise(res.data.incidents);
+             } else if (selectedOption === "userRproblem") {
+                 const res = await axios.get(
+                     "http://localhost:5000/api/expertise/userRproblem",
+                     token
+                 );
+                 setHelpMe(res.data.relatedUsers);
+             }
+         } catch (e) {
+             console.log(e);
+         }
+     };
+     // =========================================================
 
-    useEffect(() => {
-        dataRescuer();
-    }, [selectedOption]);
-
-    const dataRescuer = async () => {
-        try {
-            if (selectedOption === "related") {
-                const res = await axios.get(
-                    "http://localhost:5000/api/expertise/related",
-                    token
-                );
-                setExpertise(res.data.incidents);
-            } else if (selectedOption === "userRproblem") {
-                const res = await axios.get(
-                    "http://localhost:5000/api/expertise/userRproblem",
-                    token
-                );
-                setHelpMe(res.data.relatedUsers);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-    // =========================================================
 
     return (
         <>
