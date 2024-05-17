@@ -345,6 +345,43 @@ const Home = () => {
         return 0;
     });
 
+     // =========================================================
+     const accessToken = Cookies.get("accessToken");
+     const token = {
+         headers: {
+             "Content-Type": "application/json",
+             Authorization: `Bearer ${accessToken}`,
+         },
+     };
+     const [selectedOption, setSelectedOption] = useState("related");
+     const [expertise, setExpertise] = useState([]);
+     const [helpMe, setHelpMe] = useState([]);
+ 
+     useEffect(() => {
+         dataRescuer();
+     }, [selectedOption]);
+ 
+     const dataRescuer = async () => {
+         try {
+             if (selectedOption === "related") {
+                 const res = await axios.get(
+                     "http://localhost:5000/api/expertise/related",
+                     token
+                 );
+                 setExpertise(res.data.incidents);
+             } else if (selectedOption === "userRproblem") {
+                 const res = await axios.get(
+                     "http://localhost:5000/api/expertise/userRproblem",
+                     token
+                 );
+                 setHelpMe(res.data.relatedUsers);
+             }
+         } catch (e) {
+             console.log(e);
+         }
+     };
+     // =========================================================
+
 
     return (
         <>
