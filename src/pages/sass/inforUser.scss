@@ -113,3 +113,41 @@ a {
         
     }
 }
+
+
+@media (max-width: 768px) {
+    .user-information {
+        width: 100%;
+        padding: 0;
+    }
+
+    .user-information .form-manage .form-wrapp {
+        display: block;
+    }
+    .user-information .form-manage .form-input,
+    .user-information .form-manage .incident-form-right, 
+    .problem-left__wrapp .form-update .problem-right__form {
+        width: 100%;
+    }
+
+    .problem-left__wrapp .form-update {
+        padding: 0 20px;
+    }
+
+    .problem-left__wrapp .form-update .problem-right__form {
+        padding: 20px;
+    }
+
+    .problem-left__wrapp .form-update .problem-right__form .right-btn {
+        margin-top: 0;
+    }
+
+    .user-information .history-problem-incident {
+        width: 100%;
+        margin-top: 30px;
+    }
+
+    .user-information .form-flex {
+        display: block;
+    }
+}
