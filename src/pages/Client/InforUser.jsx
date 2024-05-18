@@ -6,6 +6,26 @@ import SpecialtyItem from "./SpecialtyItem";
 import "../sass/inforUser.scss";
 import { message } from "antd";
 
+const isValue = (value) => {
+    return !value || value.trim().length < 5;
+};
+
+const isValidName = (name) => {
+    const regex =
+        /^[a-zA-Z\sàáãạảăắằẳẵặâấầẩẫậèéẽẹẻêềếểễệđìíĩịỉòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỹỷỵÀÁÃẠẢĂẮẰẲẴẶÂẤẦẨẪẬÈÉẼẸẺÊỀẾỂỄỆĐÌÍĨỊỈÒÓÕỌỎÔỐỒỔỖỘƠỚỜỞỠỢÙÚŨỤỦƯỨỪỬỮỰỲỸỶỴ]+$/;
+    return regex.test(name);
+};
+
+const isValidPhone = (phone) => {
+    const regex = /^\d{10}$/;
+    return regex.test(phone);
+};
+
+const isEmailValid = (email) => {
+    const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regex.test(email);
+};
+
 const InforUser = () => {
     const accessToken = Cookies.get("accessToken");
 
@@ -28,6 +48,55 @@ const InforUser = () => {
     const [rescuer, setRescuer] = useState({ specialty: "", description: "" });
     const [specialityData, setSpecialityData] = useState([]);
     const [profileUpdate, setProfileUpdate] = useState(initInfo);
+    const [validate, setValidate] = useState({});
+    const [errorRecuer, setErrorRecuer] = useState({});
+
+    const validateInfo = () => {
+        const error = {};
+
+        if (isValue(profileUpdate.name)) {
+            error["name"] = "Vui lòng nhập ít nhất 5 ký tự";
+        } else {
+            if (!isValidName(profileUpdate.name)) {
+                error["name"] = "Tên của bạn có ký tự đặc biệt hoặc số";
+            }
+        }
+
+        if (isValue(profileUpdate.phone)) {
+            error["phone"] = "Vui lòng nhập số điện thoại";
+        } else if (!isValidPhone(profileUpdate.phone)) {
+            error["phone"] = "SĐT của bạn có chữ hoặc ký tự đặc biệt";
+        }
+
+        if (isValue(profileUpdate.address)) {
+            error["address"] = "Vui lòng nhập địa chỉ";
+        }
+
+        if (isValue(profileUpdate.email)) {
+            error["email"] = "Vui lòng nhập Email";
+        } else {
+            if (!isEmailValid(profileUpdate.email)) {
+                error["email"] = "Định dạng Email của bạn không đúng";
+            }
+        }
+
+        setValidate(error);
+
+        return Object.keys(error).length === 0;
+    };
+
+    const valiRescuer = () => {
+        const error = {};
+
+        if (isValue(rescuer.specialty)) {
+            error["specialty"] = "Vui lòng nhập chuyên môn của bạn";
+        } else if (!isValidName(rescuer.specialty)) {
+            error["specialty"] = "Vui lòng không nhập số hoặc ký tự đặc biệt";
+        }
+
+        setErrorRecuer(error);
+        return Object.keys(error).length === 0;
+    };
 
     useEffect(() => {
         dataProfile();
@@ -58,6 +127,14 @@ const InforUser = () => {
         });
     };
 
+    const handleChangeSpecialty = (e) => {
+        const { value, name } = e.target;
+        setRescuer({
+            ...rescuer,
+            [name]: value,
+        });
+    };
+
     const handlePassword = (e) => {
         e.preventDefault();
     };
@@ -77,45 +154,41 @@ const InforUser = () => {
     const updateProfile = async (e) => {
         e.preventDefault();
         try {
-            if (
-                userInfo.name === profile.name &&
-                userInfo.address === profile.address &&
-                userInfo.phone === profile.phone &&
-                userInfo.email === profile.email
-            ) {
-                message.info("Thông tin của bạn không có sự thay đổi nào!");
-            } else {
-                await axios.put(
-                    "http://localhost:5000/api/users/updateprofile",
-                    profileUpdate,
-                    token
-                );
-                message.success("Cập nhật thông tin thành công.");
+            if (validateInfo()) {
+                if (
+                    userInfo.name === profile.name &&
+                    userInfo.address === profile.address &&
+                    userInfo.phone === profile.phone &&
+                    userInfo.email === profile.email
+                ) {
+                    message.info("Thông tin của bạn không có sự thay đổi nào!");
+                } else {
+                    await axios.put(
+                        "http://localhost:5000/api/users/updateprofile",
+                        profileUpdate,
+                        token
+                    );
+                    message.success("Cập nhật thông tin thành công.");
+                }
             }
         } catch (err) {
             console.log(err);
         }
     };
 
-    const handleChangeSpecialty = (e) => {
-        const { value, name } = e.target;
-        setRescuer({
-            ...rescuer,
-            [name]: value,
-        });
-    };
-
     const handleRescuer = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(
-                "http://localhost:5000/api/expertise/create",
-                rescuer,
-                token
-            );
-            setRescuer({ specialty: "", description: "" });
-            message.success("Gửi thành công");
-            dataSpeciality();
+            if (valiRescuer()) {
+                await axios.post(
+                    "http://localhost:5000/api/expertise/create",
+                    rescuer,
+                    token
+                );
+                setRescuer({ specialty: "", description: "" });
+                message.success("Gửi thành công");
+                dataSpeciality();
+            }
         } catch (e) {
             console.log(e);
         }
@@ -128,6 +201,7 @@ const InforUser = () => {
                 token
             );
             setSpecialityData(res.data.data);
+            console.log(res.data.data);
         } catch (e) {
             console.log(e);
         }
@@ -151,10 +225,14 @@ const InforUser = () => {
                             type="text"
                             id="name"
                             name="name"
+                            placeholder="VD: Nguyễn Văn A"
                             value={userInfo.name}
                             onChange={handleChange}
                             className="form-input"
                         />
+                        {validate.name && (
+                            <span className="info-error">{validate.name}</span>
+                        )}
                     </div>
                     <div className="form-information">
                         <label htmlFor="address" className="form-title">
@@ -164,10 +242,16 @@ const InforUser = () => {
                             type="text"
                             id="address"
                             name="address"
+                            placeholder="VD: 100 Nguyễn Văn Linh"
                             value={userInfo.address}
                             onChange={handleChange}
                             className="form-input"
                         />
+                        {validate.address && (
+                            <span className="info-error">
+                                {validate.address}
+                            </span>
+                        )}
                     </div>
                 </div>
                 <div className="form-wrapp">
@@ -179,10 +263,14 @@ const InforUser = () => {
                             type="phone"
                             id="phone"
                             name="phone"
+                            placeholder="VD: 0962871234"
                             value={userInfo.phone}
                             onChange={handleChange}
                             className="form-input"
                         />
+                        {validate.phone && (
+                            <span className="info-error">{validate.phone}</span>
+                        )}
                     </div>
                     <div className="form-information">
                         <label htmlFor="email" className="form-title">
@@ -192,14 +280,20 @@ const InforUser = () => {
                             type="email"
                             id="email"
                             name="email"
+                            placeholder="VD: vana@gmail.com"
                             value={userInfo.email}
                             onChange={handleChange}
                             className="form-input"
                         />
+                        {validate.email && (
+                            <span className="info-error">{validate.email}</span>
+                        )}
                     </div>
                 </div>
 
-                <Button>Cập nhật</Button>
+                <div className="right-btn">
+                    <Button>Cập nhật</Button>
+                </div>
             </form>
 
             <div className="form-manage wrapp-form form-flex">
@@ -226,6 +320,11 @@ const InforUser = () => {
                                 className="form-input"
                                 placeholder="VD: Bơi lội, sửa xe..."
                             />
+                            {errorRecuer.specialty && (
+                                <span className="info-error">
+                                    {errorRecuer.specialty}
+                                </span>
+                            )}
                         </div>
                         <div className="form-information">
                             <label className="form-title" htmlFor="form-type">
@@ -280,7 +379,11 @@ const InforUser = () => {
                             className="form-input"
                         />
                     </div>
-                    <Button onClick={handlePassword}>Thay đổi mật khẩu</Button>
+                    <div className="right-btn">
+                        <Button onClick={handlePassword}>
+                            Thay đổi mật khẩu
+                        </Button>
+                    </div>
                 </form>
             </div>
         </div>

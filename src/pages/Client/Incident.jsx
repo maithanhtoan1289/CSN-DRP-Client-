@@ -61,7 +61,7 @@ const Incident = () => {
     const [routeError, setRouteError] = useState({});
 
     const isValue = (value) => {
-        return !value || value.trim().length < 1;
+        return !value || value.trim().length < 5;
     };
 
     const validateFormRoute = () => {
