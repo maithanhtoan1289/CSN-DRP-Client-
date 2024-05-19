@@ -21,6 +21,12 @@ const isValidPhone = (phone) => {
     return regex.test(phone);
 };
 
+const isValidAddress = (address) => {
+    const regex =
+        /^[a-zA-Z0-9\sàáạãảăắằặẵẳâấầậẫẩèéẹẽẻêếềệễểìíịĩỉòóọõỏôốồộỗổơớờợỡởùúụũủưứừựữửỳýỵỹỷđÀÁẠÃẢĂẮẰẶẴẲÂẤẦẬẪẨÈÉẸẼẺÊẾỀỆỄỂÌÍỊĨỈÒÓỌÕỎÔỐỒỘỖỔƠỚỜỢỠỞÙÚỤŨỦƯỨỪỰỮỬỲÝỴỸỶĐ]*$/;
+    return regex.test(address);
+};
+
 const isEmailValid = (email) => {
     const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     return regex.test(email);
@@ -56,20 +62,29 @@ const InforUser = () => {
 
         if (isValue(profileUpdate.name)) {
             error["name"] = "Vui lòng nhập ít nhất 5 ký tự";
-        } else {
-            if (!isValidName(profileUpdate.name)) {
-                error["name"] = "Tên của bạn có ký tự đặc biệt hoặc số";
-            }
+        } else if (!isValidName(profileUpdate.name)) {
+            error["name"] = "Tên của bạn có ký tự đặc biệt hoặc số";
         }
 
-        if (isValue(profileUpdate.phone)) {
-            error["phone"] = "Vui lòng nhập số điện thoại";
+        if (
+            profileUpdate.phone.length > 10 ||
+            profileUpdate.phone.length < 10
+        ) {
+            error["phone"] = "Số điện thoại của bạn ít hoặc nhiều hơn 10 số";
         } else if (!isValidPhone(profileUpdate.phone)) {
             error["phone"] = "SĐT của bạn có chữ hoặc ký tự đặc biệt";
         }
 
-        if (isValue(profileUpdate.address)) {
+        if (profileUpdate.address.length === 0) {
             error["address"] = "Vui lòng nhập địa chỉ";
+        } else if (!isValidAddress(profileUpdate.address)) {
+            error["address"] = "Vui lòng không nhập ký tự đặc biệt";
+        } else if (
+            !/^\d+\s+[a-zA-ZàáạãảăắằặẵẳâấầậẫẩèéẹẽẻêếềệễểìíịĩỉòóọõỏôốồộỗổơớờợỡởùúụũủưứừựữửỳýỵỹỷđÀÁẠÃẢĂẮẰẶẴẲÂẤẦẬẪẨÈÉẸẼẺÊẾỀỆỄỂÌÍỊĨỈÒÓỌÕỎÔỐỒỘỖỔƠỚỜỢỠỞÙÚỤŨỦƯỨỪỰỮỬỲÝỴỸỶĐ]+\s*[a-zA-Z0-9\sàáạãảăắằặẵẳâấầậẫẩèéẹẽẻêếềệễểìíịĩỉòóọõỏôốồộỗổơớờợỡởùúụũủưứừựữửỳýỵỹỷđÀÁẠÃẢĂẮẰẶẴẲÂẤẦẬẪẨÈÉẸẼẺÊẾỀỆỄỂÌÍỊĨỈÒÓỌÕỎÔỐỒỘỖỔƠỚỜỢỠỞÙÚỤŨỦƯỨỪỰỮỬỲÝỴỸỶĐ]*$/.test(
+                profileUpdate.address
+            )
+        ) {
+            error["address"] = "Vui lòng nhập địa chỉ đầy đủ";
         }
 
         if (isValue(profileUpdate.email)) {
@@ -92,6 +107,10 @@ const InforUser = () => {
             error["specialty"] = "Vui lòng nhập chuyên môn của bạn";
         } else if (!isValidName(rescuer.specialty)) {
             error["specialty"] = "Vui lòng không nhập số hoặc ký tự đặc biệt";
+        }
+
+        if (!isValidAddress(rescuer.description)) {
+            error["description"] = "Vui lòng không nhập hoặc ký tự đặc biệt";
         }
 
         setErrorRecuer(error);
@@ -337,6 +356,11 @@ const InforUser = () => {
                                 id="form-content"
                                 className="form-input"
                             ></textarea>
+                            {errorRecuer.description && (
+                                <span className="info-error">
+                                    {errorRecuer.description}
+                                </span>
+                            )}
                         </div>
                         <div className="right-btn">
                             <Button>Gửi</Button>
