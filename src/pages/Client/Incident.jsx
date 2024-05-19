@@ -61,7 +61,19 @@ const Incident = () => {
     const [routeError, setRouteError] = useState({});
 
     const isValue = (value) => {
-        return !value || value.trim().length < 5;
+        return !value || value.trim().length < 2;
+    };
+
+    const isValidName = (name) => {
+        const regex =
+            /^[a-zA-Z\sàáãạảăắằẳẵặâấầẩẫậèéẽẹẻêềếểễệđìíĩịỉòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỹỷỵÀÁÃẠẢĂẮẰẲẴẶÂẤẦẨẪẬÈÉẼẸẺÊỀẾỂỄỆĐÌÍĨỊỈÒÓÕỌỎÔỐỒỔỖỘƠỚỜỞỠỢÙÚŨỤỦƯỨỪỬỮỰỲỸỶỴ]+$/;
+        return regex.test(name);
+    };
+
+    const isValidAddress = (address) => {
+        const regex =
+            /^[a-zA-Z0-9\sàáạãảăắằặẵẳâấầậẫẩèéẹẽẻêếềệễểìíịĩỉòóọõỏôốồộỗổơớờợỡởùúụũủưứừựữửỳýỵỹỷđÀÁẠÃẢĂẮẰẶẴẲÂẤẦẬẪẨÈÉẸẼẺÊẾỀỆỄỂÌÍỊĨỈÒÓỌÕỎÔỐỒỘỖỔƠỚỜỢỠỞÙÚỤŨỦƯỨỪỰỮỬỲÝỴỸỶĐ]*$/;
+        return regex.test(address);
     };
 
     const validateFormRoute = () => {
@@ -69,10 +81,22 @@ const Incident = () => {
 
         if (isValue(shareRoute.name)) {
             error["name"] = "Vui lòng nhập sự cố";
+        } else if (!isValidName(shareRoute.name)) {
+            error["name"] = "Vui lòng không nhập ký tự đặc biệt hoặc số";
         }
-        if (isValue(shareRoute.location)) {
+
+        if (shareRoute.location.length < 2) {
             error["location"] = "Vui lòng nhập địa chỉ";
+        } else if (
+            !/^\d+\s+[a-zA-ZàáạãảăắằặẵẳâấầậẫẩèéẹẽẻêếềệễểìíịĩỉòóọõỏôốồộỗổơớờợỡởùúụũủưứừựữửỳýỵỹỷđÀÁẠÃẢĂẮẰẶẴẲÂẤẦẬẪẨÈÉẸẼẺÊẾỀỆỄỂÌÍỊĨỈÒÓỌÕỎÔỐỒỘỖỔƠỚỜỢỠỞÙÚỤŨỦƯỨỪỰỮỬỲÝỴỸỶĐ]+\s*[a-zA-Z0-9\sàáạãảăắằặẵẳâấầậẫẩèéẹẽẻêếềệễểìíịĩỉòóọõỏôốồộỗổơớờợỡởùúụũủưứừựữửỳýỵỹỷđÀÁẠÃẢĂẮẰẶẴẲÂẤẦẬẪẨÈÉẸẼẺÊẾỀỆỄỂÌÍỊĨỈÒÓỌÕỎÔỐỒỘỖỔƠỚỜỢỠỞÙÚỤŨỦƯỨỪỰỮỬỲÝỴỸỶĐ]*$/.test(
+                shareRoute.location
+            )
+        ) {
+            error["location"] = "Vui lòng nhập địa chỉ đầy đủ";
+        } else if (!isValidAddress(shareRoute.location)) {
+            error["location"] = "Vui lòng không nhập ký tự đặc biệt";
         }
+
         if (isValue(shareRoute.description)) {
             error["description"] = "Vui lòng mô tả sự cố";
         }
@@ -340,6 +364,7 @@ const Incident = () => {
                                 <input
                                     type="text"
                                     name="location"
+                                    placeholder="VD: 100 Nguyễn Văn Linh"
                                     value={shareRoute.location}
                                     onChange={handleChange}
                                     id="form-address"
