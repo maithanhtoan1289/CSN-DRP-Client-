@@ -21,17 +21,53 @@ import { yupResolver } from "@hookform/resolvers/yup";
 const { Content } = Layout;
 
 // Define validate yup
+// Define validate yup
 const schema = yup.object().shape({
   username: yup
     .string()
     .required("Vui lòng nhập tên tài khoản")
     .min(5, "Tên tài khoản phải có ít nhất 5 ký tự")
-    .max(30, "Tên tài khoản chỉ được nhập tối đa 30 ký tự"),
+    .max(30, "Tên tài khoản chỉ được nhập tối đa 30 ký tự")
+    .test(
+      "uppercase-characters",
+      "Tên tài khoản không hợp lệ. Vui lòng nhập lại",
+      (value) => !/[A-Z]/.test(value)
+    )
+    .test(
+      "special-characters",
+      "Tên tài khoản không được chứa kí tự đặc biệt. Vui lòng nhập lại",
+      (value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value)
+    )
+    .test(
+      "no-whitespace",
+      "Tên tài khoản không được chứa khoảng cách. Vui lòng nhập lại",
+      (value) => !/\s/.test(value)
+    ),
   password: yup
     .string()
     .required("Vui lòng nhập mật khẩu")
     .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
-    .max(30, "Mật khẩu chỉ được nhập tối đa 30 ký tự"),
+    .max(30, "Mật khẩu chỉ được nhập tối đa 30 ký tự")
+    .test(
+      "no-uppercase-characters",
+      "Mật khẩu không chứa chữ in hoa",
+      (value) => !/[A-Z]/.test(value)
+    )
+    .test(
+      "special-characters",
+      "Mật khẩu không hợp lệ. Vui lòng nhập lại",
+      (value) => !/[!@#$%^&*(),?":{}|<>]/.test(value)
+    )
+    .test(
+      "no-whitespace",
+      "Mật khẩu không hợp lệ. Vui lòng nhập lại",
+      (value) => !/\s/.test(value)
+    )
+    .test(
+      "not-all-uppercase",
+      "Mật khẩu không hợp lệ. Vui lòng nhập lại",
+      (value) => !/^[A-Z]*$/.test(value)
+    ),
 });
 
 export default function Login() {
