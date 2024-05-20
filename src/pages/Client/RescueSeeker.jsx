@@ -41,13 +41,29 @@ const schema = yup.object().shape({
   phone: yup
     .string()
     .required("Vui lòng nhập số điện thoại")
-    .min(10, "Số điện thoại chỉ được nhập tối thiểu 10 ký tự")
-    .max(10, "Số điện thoại chỉ được nhập tối đa 10 ký tự"),
+    .min(10, "Vui lòng nhập tối thiểu 10 số")
+    .max(10, "Vui lòng nhập tối thiểu 10 số")
+    .matches(/^(03|05|07|08|09)+([0-9]{8})$/, "Số điện thoại không hợp lệ")
+    .test("only-digits", "Số điện thoại không hợp lệ", (value) =>
+      /^\d+$/.test(value)
+    ),
   address: yup
     .string()
     .required("Vui lòng nhập địa chỉ")
-    .min(5, "Địa chỉ phải có ít nhất 10 ký tự")
-    .max(100, "Địa chỉ chỉ được nhập tối đa 100 ký tự"),
+    .test("first-uppercase", "Vui lòng nhập lại địa chỉ", (value) => {
+      if (/^[a-zA-Z]/.test(value)) {
+        return /^[A-Z]/.test(value);
+      }
+      return true;
+    })
+    .test("not-all-digits", "Vui lòng nhập lại địa chỉ", (value) => {
+      return !/^\d+$/.test(value);
+    })
+    .test(
+      "special-characters",
+      "Vui lòng nhập lại địa chỉ",
+      (value) => !/[!@#$%^&*()?":{}|<>]/.test(value)
+    ),
 });
 
 const RescueSeeker = () => {

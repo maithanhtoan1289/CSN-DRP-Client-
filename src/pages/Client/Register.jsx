@@ -26,25 +26,123 @@ const schema = yup.object().shape({
   name: yup
     .string()
     .required("Vui lòng nhập họ và tên")
-    .min(5, "Họ và tên phải có ít nhất 5 ký tự")
-    .max(30, "Họ và tên chỉ được nhập tối đa 50 ký tự"),
+    .min(5, "Vui lòng nhập ít nhất 5 kí tự")
+    .max(30, "Họ và tên chỉ được nhập tối đa 50 ký tự")
+    .test("no-digits", "Tên không hợp lệ. Vui lòng nhập lại", (value) =>
+      /^\D+$/.test(value)
+    )
+    .test(
+      "uppercase-first-letter",
+      "Tên không hợp lệ. Vui lòng nhập lại",
+      (value) => {
+        if (!value) return true;
+        const words = value.split(" ");
+        for (let word of words) {
+          if (!/^[A-Z]/.test(word)) {
+            return false;
+          }
+        }
+        return true;
+      }
+    )
+    .test(
+      "special-characters",
+      "Tên không hợp lệ. Vui lòng nhập lại",
+      (value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value)
+    )
+    .test(
+      "space-before-uppercase",
+      "Tên không hợp lệ. Vui lòng nhập lại",
+      (value) => {
+        const regex = /(?:^|\s)([A-Z][a-z]*){2,}(?=\s|$)/g;
+        let match;
+        while ((match = regex.exec(value)) !== null) {
+          if (match.index !== 0 && match.index !== value.length - 1) {
+            return false;
+          }
+        }
+        return true;
+      }
+    ),
   username: yup
     .string()
     .required("Vui lòng nhập tên tài khoản")
     .min(5, "Tên tài khoản phải có ít nhất 5 ký tự")
-    .max(30, "Tên tài khoản chỉ được nhập tối đa 30 ký tự"),
+    .max(30, "Tên tài khoản chỉ được nhập tối đa 30 ký tự")
+    .test(
+      "uppercase-characters",
+      "Tên tài khoản không hợp lệ. Vui lòng nhập lại",
+      (value) => !/[A-Z]/.test(value)
+    )
+    .test(
+      "special-characters",
+      "Tên tài khoản không được chứa kí tự đặc biệt. Vui lòng nhập lại",
+      (value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value)
+    )
+    .test(
+      "no-whitespace",
+      "Tên tài khoản không được chứa khoảng cách. Vui lòng nhập lại",
+      (value) => !/\s/.test(value)
+    ),
   email: yup
     .string()
     .required("Vui lòng nhập địa chỉ email")
-    .email("Địa chỉ email không hợp lệ"),
+    .email("Email không hợp lệ. Vui lòng nhập lại")
+    .test(
+      "no-digits-before-at",
+      "Email không hợp lệ. Vui lòng nhập lại",
+      (value) => {
+        const atIndex = value.indexOf("@");
+        const localPart = value.substring(0, atIndex);
+        return /^\D.*$/.test(localPart);
+      }
+    )
+    .test(
+      "valid-domain",
+      "Tên miền không hợp lệ. Vui lòng nhập lại",
+      (value) => {
+        const atIndex = value.indexOf("@");
+        const domainPart = value.substring(atIndex + 1);
+        return /\S+\.\S+/.test(domainPart);
+      }
+    )
+    .test(
+      "no-special-characters-before-at",
+      "Email không hợp lệ. Vui lòng nhập lại",
+      (value) => {
+        const atIndex = value.indexOf("@");
+        const localPart = value.substring(0, atIndex);
+        return /^[a-zA-Z0-9._%+-]+$/.test(localPart);
+      }
+    ),
   password: yup
     .string()
     .required("Vui lòng nhập mật khẩu")
     .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
-    .max(30, "Mật khẩu chỉ được nhập tối đa 30 ký tự"),
+    .max(30, "Mật khẩu chỉ được nhập tối đa 30 ký tự")
+    .test(
+      "no-uppercase-characters",
+      "Mật khẩu không chứa chữ in hoa",
+      (value) => !/[A-Z]/.test(value)
+    )
+    .test(
+      "special-characters",
+      "Mật khẩu không hợp lệ. Vui lòng nhập lại",
+      (value) => !/[!@#$%^&*(),?":{}|<>]/.test(value)
+    )
+    .test(
+      "no-whitespace",
+      "Mật khẩu không hợp lệ. Vui lòng nhập lại",
+      (value) => !/\s/.test(value)
+    )
+    .test(
+      "not-all-uppercase",
+      "Mật khẩu không hợp lệ. Vui lòng nhập lại",
+      (value) => !/^[A-Z]*$/.test(value)
+    ),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password"), null], "Mật khẩu xác nhận không khớp")
+    .oneOf([yup.ref("password"), null], "Mật khẩu không hợp lệ")
     .required("Vui lòng nhập xác nhận mật khẩu"),
   agreement: yup
     .boolean()

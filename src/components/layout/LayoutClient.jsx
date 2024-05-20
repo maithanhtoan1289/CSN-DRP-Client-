@@ -75,13 +75,12 @@ const schema = yup.object().shape({
   phone: yup
     .string()
     .required("Vui lòng nhập số điện thoại")
-    .min(10, "Số điện thoại chỉ được nhập tối thiểu 10 ký tự")
-    .max(10, "Số điện thoại chỉ được nhập tối đa 10 ký tự"),
-  // address: yup
-  //   .string()
-  //   .required("Vui lòng nhập địa chỉ")
-  //   .min(5, "Địa chỉ phải có ít nhất 10 ký tự")
-  //   .max(100, "Địa chỉ chỉ được nhập tối đa 100 ký tự"),
+    .min(10, "Vui lòng nhập tối thiểu 10 số")
+    .max(10, "Vui lòng nhập tối thiểu 10 số")
+    .test("only-digits", "Số điện thoại không hợp lệ", (value) =>
+      /^\d+$/.test(value)
+    )
+    .matches(/^(03|05|07|08|09)+([0-9]{8})$/, "Số điện thoại không hợp lệ"),
 });
 
 function getItem(label, key, icon, path) {
