@@ -54,12 +54,6 @@ const HistoryProlem = () => {
                         </div>
                     </div>
                 </div>
-
-                <div className="history-problem wrapp-form">
-                    <h3 className="history-problem__heading">
-                        Bài viết quyên góp đã đăng
-                    </h3>
-                </div>
             </div>
         </div>
     );
