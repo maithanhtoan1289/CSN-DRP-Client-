@@ -36,6 +36,9 @@ const AdminHistoryNatural = lazy(() =>
 const AdminHistoryProblem = lazy(() =>
     import("./components/tables/HistoryProblemManagement")
 );
+const AdminProblemIncident = lazy(() =>
+    import("./components/tables/AdminProblemIncident")
+);
 
 const AuthenticatedAdminNaturalDisaster = withAuthentication(
     AdminNaturalDisaster,
@@ -54,6 +57,10 @@ const AuthenticatedAdminHistoryNatural = withAuthentication(
 );
 const AuthenticatedAdminHistoryProblem = withAuthentication(
     AdminHistoryProblem,
+    ["ROLE_ADMIN"]
+);
+const AuthenticatedAdminProblemIncident = withAuthentication(
+    AdminProblemIncident,
     ["ROLE_ADMIN"]
 );
 
@@ -163,6 +170,12 @@ function App() {
                                         path="/history-problem"
                                         element={
                                             <AuthenticatedAdminHistoryProblem />
+                                        }
+                                    />
+                                    <Route
+                                        path="/problem-incident"
+                                        element={
+                                            <AuthenticatedAdminProblemIncident />
                                         }
                                     />
                                 </Routes>
