@@ -26,8 +26,8 @@ const schema = yup.object().shape({
   name: yup
     .string()
     .required("Vui lòng nhập họ và tên")
-    .min(5, "Vui lòng nhập ít nhất 5 kí tự")
-    .max(30, "Họ và tên chỉ được nhập tối đa 50 ký tự")
+    .min(6, "Vui lòng nhập ít nhất 6 kí tự")
+    .max(70, "Họ và tên chỉ được nhập tối đa 70 ký tự")
     .test("no-digits", "Tên không hợp lệ. Vui lòng nhập lại", (value) =>
       /^\D+$/.test(value)
     )
