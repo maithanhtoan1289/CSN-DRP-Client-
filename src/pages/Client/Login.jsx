@@ -29,11 +29,6 @@ const schema = yup.object().shape({
     .min(5, "Tên tài khoản phải có ít nhất 5 ký tự")
     .max(30, "Tên tài khoản chỉ được nhập tối đa 30 ký tự")
     .test(
-      "uppercase-characters",
-      "Tên tài khoản không hợp lệ. Vui lòng nhập lại",
-      (value) => !/[A-Z]/.test(value)
-    )
-    .test(
       "special-characters",
       "Tên tài khoản không được chứa kí tự đặc biệt. Vui lòng nhập lại",
       (value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value)
