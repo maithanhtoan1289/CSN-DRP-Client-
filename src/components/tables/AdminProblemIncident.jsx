@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table } from "antd";
+import { Table, Tag } from "antd";
 import "../../App.css";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -78,6 +78,19 @@ const AdminProblemIncident = () => {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
+            filters: [
+                { text: "đã giải quyết", value: "đã giải quyết" },
+                { text: "chưa giải quyết", value: "chưa giải quyết" },
+            ],
+            onFilter: (value, record) => record.status === value,
+            render: (status) => {
+                let color = status === "đã giải quyết" ? "green" : "red";
+                let text =
+                    status === "đã giải quyết"
+                        ? "Đã giải quyết"
+                        : "Chưa giải quyết";
+                return <Tag color={color}>{text}</Tag>;
+            },
         },
         {
             title: "Người chia sẻ",
