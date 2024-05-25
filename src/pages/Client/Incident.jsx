@@ -27,7 +27,7 @@ const Incident = () => {
 
     //render maps
     useEffect(() => {
-        goongjs.accessToken = GOONG_MAP_KEY;
+        goongjs.accessToken = "8qzxZAuxcsctSlmOszInchP1A5GrmRBHJwCBCjO6";
         const map = new goongjs.Map({
             container: "problem-map",
             style: "https://tiles.goong.io/assets/goong_map_web.json",
