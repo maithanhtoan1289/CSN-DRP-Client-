@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Tag } from "antd";
+import { Button, Table, Tag, message } from "antd";
 import "../../App.css";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -18,26 +18,26 @@ const AdminProblemIncident = () => {
     };
 
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get(
-                    "http://localhost:5000/api/incident/getIncident",
-                    token
-                );
-                const newData = response.data.data.map((item) => ({
-                    ...item,
-                    daysAgo: getDaysAgo(item.created_at),
-                }));
-                setData(newData);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-            setLoading(false);
-        };
-
         fetchData();
     }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(
+                "http://localhost:5000/api/incident/getIncident",
+                token
+            );
+            const newData = response.data.data.map((item) => ({
+                ...item,
+                daysAgo: getDaysAgo(item.created_at),
+            }));
+            setData(newData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+        setLoading(false);
+    };
 
     const getDaysAgo = (createdAt) => {
         const createdDate = new Date(createdAt);
@@ -45,6 +45,24 @@ const AdminProblemIncident = () => {
         const timeDiff = currentDate.getTime() - createdDate.getTime();
         const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
         return daysDiff;
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(
+                `http://localhost:5000/api/incident/delete/${id}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            message.success("Xóa bài viết thành công");
+            fetchData();
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     const columns = [
@@ -96,6 +114,17 @@ const AdminProblemIncident = () => {
             title: "Người chia sẻ",
             dataIndex: "user_name",
             key: "user_name",
+        },
+        {
+            title: "",
+            dataIndex: "delete",
+            render: (status, index) => {
+                return (
+                    <Button onClick={() => handleDelete(index.id)}>
+                        Delete
+                    </Button>
+                );
+            },
         },
     ];
 
