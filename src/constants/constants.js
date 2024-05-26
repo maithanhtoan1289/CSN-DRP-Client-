@@ -1,3 +1,3 @@
-export const GOONG_MAP_KEY = "RPTXmcQEy2r3meEHOZFZ3B5L7u68a8YO5XF9pAuM";
+export const GOONG_MAP_KEY = "sw3VvS1N9lmjwd9m3KRjqbYnG1lqsMjx0hPx0XT6";
 
-export const API_KEY = "P1u1iyZoRjGvb80wTPKsBU7SqlSdEaN9JP6jpGqT";
+export const API_KEY = "WLMgLCxtmnkKPLqNJgyauZLPiVJv2dRHuKS4HKml";
