@@ -14,8 +14,10 @@ const HistoryProblemItem = ({
     id,
     name,
     location,
+    status,
     description,
     dataIncident,
+    date,
 }) => {
     const userInfo = useSelector((state) => state?.user?.userInfo);
 
@@ -104,11 +106,15 @@ const HistoryProblemItem = ({
             </span>
             <div className="problem-content">
                 <h4 className="problem-name">{userInfo.name}</h4>
+                <span>{date}</span>
                 <p className="problem-decs">
                     <strong>Tuyến đường gặp sự cố:</strong> {location}
                 </p>
                 <p className="problem-decs">
                     <strong>Loại sự cố:</strong> {name}
+                </p>
+                <p className="problem-decs">
+                    <strong>Trạng thái:</strong> {status}
                 </p>
                 <p className="problem-decs">
                     <strong>Mô tả sự cố:</strong> {description}

@@ -1017,7 +1017,7 @@ const Home = () => {
                                         marginBottom: 0,
                                     }}
                                 >
-                                    Danh sách người cứu hộ
+                                    Gợi ý cứu hộ
                                 </Typography.Title>
                             </Col>
                             <Col>
