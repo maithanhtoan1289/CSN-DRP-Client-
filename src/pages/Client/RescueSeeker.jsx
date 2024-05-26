@@ -508,6 +508,38 @@ const RescueSeeker = () => {
     }
   };
 
+    // Task final
+    const sortedRescueNeededList = rescueNeededList.slice().sort((a, b) => {
+      // Prioritize "Khẩn cấp"
+      if (
+        a.disaster_priority === "Khẩn cấp" ||
+        a.problem_priority === "Khẩn cấp"
+      ) {
+        return -1;
+      } else if (
+        b.disaster_priority === "Khẩn cấp" ||
+        b.problem_priority === "Khẩn cấp"
+      ) {
+        return 1;
+      }
+  
+      // Then prioritize "Trung bình"
+      if (
+        a.disaster_priority === "Trung bình" ||
+        a.problem_priority === "Trung bình"
+      ) {
+        return -1;
+      } else if (
+        b.disaster_priority === "Trung bình" ||
+        b.problem_priority === "Trung bình"
+      ) {
+        return 1;
+      }
+  
+      // Finally, items without priority
+      return 0;
+    });
+
   return (
     <>
       <Breadcrumb
@@ -873,13 +905,15 @@ const RescueSeeker = () => {
             selectedKeys={selectedItem ? [String(selectedItem)] : []}
             disabled={!isFirstMarkerClicked}
           >
-            {rescueNeededList.map((item) => (
+            {/* Task final */}
+            {sortedRescueNeededList.map((item) => (
               <Menu.Item
                 key={String(item.id)}
                 onClick={() => handleClick(item)}
                 style={{
                   height: "145px",
                   border: "1px solid rgba(5, 5, 5, 0.06)",
+                  position: "relative",
                 }}
               >
                 <Row>
@@ -913,6 +947,32 @@ const RescueSeeker = () => {
                       style={{ display: "block", fontSize: "13px" }}
                     >
                       Trạng thái: {item.disaster_status || item.problem_status}
+                    </Text>
+
+                    {/* Task 1 */}
+                    <Text
+                      type="secondary"
+                      style={{
+                        display: "block",
+                        fontSize: "13px",
+                      }}
+                    >
+                      Độ ưu tiên:{" "}
+                      <Text
+                        style={{
+                          fontWeight: "600",
+                          color:
+                            item.disaster_priority === "Khẩn cấp" ||
+                            item.problem_priority === "Khẩn cấp"
+                              ? "red"
+                              : item.disaster_priority === "Trung bình" ||
+                                item.problem_priority === "Trung bình"
+                              ? "green"
+                              : "inherit",
+                        }}
+                      >
+                        {item.disaster_priority || item.problem_priority}
+                      </Text>
                     </Text>
                   </Col>
                 </Row>
