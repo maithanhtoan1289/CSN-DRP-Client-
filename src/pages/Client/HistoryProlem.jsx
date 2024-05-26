@@ -4,6 +4,16 @@ import { useEffect, useState } from "react";
 import "../sass/historyProlem.scss";
 import HistoryProblemItem from "./HistoryProblemItem";
 
+export const formatDate = (format) => {
+    const date = new Date(format);
+
+    return date.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    });
+};
+
 const HistoryProlem = () => {
     const accessToken = Cookies.get("accessToken");
     const token = {
@@ -47,8 +57,10 @@ const HistoryProlem = () => {
                                     id={item.id}
                                     name={item.name}
                                     location={item.location}
+                                    status={item.status}
                                     description={item.description}
                                     dataIncident={dataIncident}
+                                    date={formatDate(item.created_at)}
                                 />
                             ))}
                         </div>

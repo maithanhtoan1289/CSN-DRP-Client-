@@ -14,6 +14,7 @@ import Button from "../Client/Button";
 import { GOONG_MAP_KEY } from "../../constants/constants";
 import { useDispatch } from "react-redux";
 import { reverseGeocoding } from "../../features/Goong/goongSlice";
+import { formatDate } from "./HistoryProlem";
 
 const Incident = () => {
     const accessToken = Cookies.get("accessToken");
@@ -27,7 +28,7 @@ const Incident = () => {
 
     //render maps
     useEffect(() => {
-        goongjs.accessToken = "8qzxZAuxcsctSlmOszInchP1A5GrmRBHJwCBCjO6";
+        goongjs.accessToken = GOONG_MAP_KEY;
         const map = new goongjs.Map({
             container: "problem-map",
             style: "https://tiles.goong.io/assets/goong_map_web.json",
@@ -273,6 +274,7 @@ const Incident = () => {
                                       <h4 className="problem-name">
                                           {item.user_name}
                                       </h4>
+                                      <span>{formatDate(item.created_at)}</span>
                                       <p className="problem-decs">
                                           <strong>
                                               Tuyến đường gặp sự cố:
@@ -282,6 +284,10 @@ const Incident = () => {
                                       <p className="problem-decs">
                                           <strong>Loại sự cố:</strong>{" "}
                                           {item.name}
+                                      </p>
+                                      <p className="problem-decs">
+                                          <strong>Trạng thái:</strong>{" "}
+                                          {item.status}
                                       </p>
                                       <p className="problem-decs">
                                           <strong>Mô tả sự cố:</strong>{" "}
@@ -302,7 +308,7 @@ const Incident = () => {
                                       <h4 className="problem-name">
                                           {item.user_name}
                                       </h4>
-                                      <span>{item.updated_at}</span>
+                                      <span>{formatDate(item.created_at)}</span>
                                       <p className="problem-decs">
                                           <strong>
                                               Tuyến đường gặp sự cố:
@@ -312,6 +318,10 @@ const Incident = () => {
                                       <p className="problem-decs">
                                           <strong>Loại sự cố:</strong>{" "}
                                           {item.name}
+                                      </p>
+                                      <p className="problem-decs">
+                                          <strong>Trạng thái:</strong>{" "}
+                                          {item.status}
                                       </p>
                                       <p className="problem-decs">
                                           <strong>Mô tả sự cố:</strong>{" "}
